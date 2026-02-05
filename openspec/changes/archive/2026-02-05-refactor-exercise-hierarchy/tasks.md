@@ -11,6 +11,6 @@
 - [x] 2.2 Update `app/exercises/page.tsx` for the new hierarchical layout.
 
 ## 3. Verification
-- [ ] 3.1 Verify that children are correctly nested under parents.
-- [ ] 3.2 Verify that logging still works correctly for specific variations.
-- [ ] 3.3 Verify PR tracking still works (and optionally aggregates by parent).
+- [x] 3.1 Verify that children are correctly nested under parents.
+- [x] 3.2 Verify that logging still works correctly for specific variations.
+- [x] 3.3 Verify PR tracking still works (and optionally aggregates by parent).

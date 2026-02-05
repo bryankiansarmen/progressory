@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import { Exercise } from "@/types";
 import { Input } from "@/components/ui/input";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface ExercisePickerProps {
     allExercises: Exercise[];
@@ -14,10 +15,9 @@ interface ExercisePickerProps {
 
 export default function ExercisePicker({ allExercises, onSelect, excludeIds = [] }: ExercisePickerProps) {
     const [searchQuery, setSearchQuery] = useState("");
-    const [categoryFilter, setCategoryFilter] = useState("all");
     const [muscleGroupFilter, setMuscleGroupFilter] = useState("all");
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    const categories = ["all", "Strength", "Cardio", "Flexibility", "Stretching"];
     const muscleGroups = [
         "all",
         "Chest",
@@ -29,16 +29,24 @@ export default function ExercisePicker({ allExercises, onSelect, excludeIds = []
         "FullBody",
     ];
 
-    const filteredExercises = useMemo(() => {
+    const toggleExpand = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setExpandedId(prev => prev === id ? null : id);
+    };
+
+    const filteredMovements = useMemo(() => {
         return allExercises
             .filter((ex) => !excludeIds.includes(ex.id))
             .filter((ex) => {
-                const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesCategory = categoryFilter === "all" || ex.category === categoryFilter;
+                const matchesSearch =
+                    ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    ex.variations?.some(v => v.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
                 const matchesMuscleGroup = muscleGroupFilter === "all" || ex.muscleGroup === muscleGroupFilter;
-                return matchesSearch && matchesCategory && matchesMuscleGroup;
+
+                return matchesSearch && matchesMuscleGroup;
             });
-    }, [allExercises, searchQuery, categoryFilter, muscleGroupFilter, excludeIds]);
+    }, [allExercises, searchQuery, muscleGroupFilter, excludeIds]);
 
     return (
         <div className="space-y-4">
@@ -46,7 +54,7 @@ export default function ExercisePicker({ allExercises, onSelect, excludeIds = []
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search exercises..."
+                        placeholder="Search movements (e.g. Press)..."
                         className="pl-9 h-10 rounded-xl bg-card border-none shadow-inner"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -64,30 +72,84 @@ export default function ExercisePicker({ allExercises, onSelect, excludeIds = []
             </div>
 
             <div className="max-h-[400px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                {filteredExercises.length > 0 ? (
-                    filteredExercises.map((exercise) => (
-                        <div
-                            key={exercise.id}
-                            onClick={() => onSelect(exercise)}
-                            className="flex items-center justify-between p-3 rounded-xl border-2 border-transparent hover:border-primary/30 hover:bg-primary/5 cursor-pointer transition-all group"
-                        >
-                            <div className="flex flex-col">
-                                <span className="font-semibold group-hover:text-primary transition-colors">{exercise.name}</span>
-                                <div className="flex gap-2 mt-1">
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/20 bg-primary/5">
-                                        {exercise.muscleGroup}
-                                    </Badge>
-                                    <span className="text-xs text-muted-foreground">{exercise.category}</span>
+                {filteredMovements.length > 0 ? (
+                    filteredMovements.map((movement) => {
+                        const hasVariations = (movement.variations?.length || 0) > 0;
+                        const isExpanded = expandedId === movement.id || searchQuery.length > 0;
+
+                        return (
+                            <div key={movement.id} className="space-y-1">
+                                {/* Movement Header */}
+                                <div
+                                    onClick={() => hasVariations ? setExpandedId(movement.id) : onSelect(movement)}
+                                    className={cn(
+                                        "flex items-center justify-between p-3 rounded-xl border-2 transition-all group cursor-pointer",
+                                        isExpanded && hasVariations ? "border-primary/20 bg-primary/5 shadow-sm" : "border-transparent hover:bg-muted"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {hasVariations && (
+                                            <div
+                                                onClick={(e) => toggleExpand(movement.id, e)}
+                                                className="p-1 hover:bg-primary/10 rounded-md transition-colors"
+                                            >
+                                                {isExpanded ? <ChevronDown className="w-4 h-4 text-primary" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                                            </div>
+                                        )}
+                                        <div className="flex flex-col">
+                                            <span className="font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                                                {movement.name}
+                                            </span>
+                                            <div className="flex gap-2 mt-0.5">
+                                                <Badge variant="outline" className="text-[9px] px-1 h-3.5 border-primary/20 bg-primary/5 uppercase font-black tracking-tighter">
+                                                    {movement.muscleGroup}
+                                                </Badge>
+                                                {hasVariations && (
+                                                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-1">
+                                                        <Info className="w-3 h-3" /> {movement.variations?.length} Options
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {!hasVariations && (
+                                        <div className="p-2 bg-primary/10 rounded-full group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                                            <Plus className="w-4 h-4" />
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* Variations List */}
+                                {hasVariations && isExpanded && (
+                                    <div className="ml-8 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                                        {movement.variations?.map((variation) => (
+                                            <div
+                                                key={variation.id}
+                                                onClick={() => onSelect(variation)}
+                                                className="flex items-center justify-between p-2 pl-4 rounded-xl border border-transparent hover:border-primary/20 hover:bg-primary/5 cursor-pointer transition-all group/var"
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-semibold text-muted-foreground group-hover/var:text-primary transition-colors">
+                                                        {variation.name}
+                                                    </span>
+                                                    <span className="text-[10px] text-primary/60 font-black uppercase tracking-widest">
+                                                        {variation.equipment || "Standard"}
+                                                    </span>
+                                                </div>
+                                                <div className="p-1.5 bg-primary/5 rounded-full group-hover/var:bg-primary group-hover/var:text-white transition-all">
+                                                    <Plus className="w-3 h-3" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            <div className="p-2 bg-primary/10 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-                                <Plus className="w-4 h-4" />
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
-                    <div className="text-center py-8 text-muted-foreground italic">
-                        No Exercises Found
+                    <div className="text-center py-12 bg-muted/20 rounded-3xl border-2 border-dashed border-muted text-muted-foreground font-medium italic">
+                        No Movements Found
                     </div>
                 )}
             </div>

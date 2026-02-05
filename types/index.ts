@@ -6,6 +6,8 @@ export interface Exercise {
     equipment: string | null;
     isCustom?: boolean;
     userId: string | null;
+    parentId?: string | null;
+    variations?: Exercise[];
     createdAt?: Date;
     updatedAt?: Date;
 }

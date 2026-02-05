@@ -9,8 +9,14 @@ import { Exercise } from "@/types";
  */
 export const getExercises = async (): Promise<Exercise[]> => {
     return await db.exercise.findMany({
+        where: { parentId: null },
+        include: {
+            variations: {
+                orderBy: { name: "asc" }
+            }
+        },
         orderBy: { name: "asc" }
-    });
+    }) as any;
 };
 
 /**

@@ -5,8 +5,6 @@ import { Exercise } from "@/types";
 import ExerciseCard from "./ExerciseCard";
 import ExerciseFilters from "./ExerciseFilters";
 import CreateExerciseDialog from "./CreateExerciseDialog";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface ExerciseLibraryContainerProps {
     initialExercises: Exercise[];
@@ -20,9 +18,13 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
 
     const filteredExercises = useMemo(() => {
         return exercises.filter((ex) => {
-            const matchesSearch = ex.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesSearch =
+                ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                ex.variations?.some(v => v.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
             const matchesCategory = categoryFilter === "all" || ex.category === categoryFilter;
             const matchesMuscleGroup = muscleGroupFilter === "all" || ex.muscleGroup === muscleGroupFilter;
+
             return matchesSearch && matchesCategory && matchesMuscleGroup;
         });
     }, [exercises, searchQuery, categoryFilter, muscleGroupFilter]);
@@ -52,9 +54,9 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-20 border-2 border-dashed rounded-xl">
-                    <h3 className="text-xl font-semibold mb-2">No exercises found</h3>
-                    <p className="text-muted-foreground mb-6">Try adjusting your filters or create a new custom exercise.</p>
+                <div className="text-center py-24 bg-card/30 border-2 border-dashed rounded-[40px] px-6">
+                    <h3 className="text-2xl font-black tracking-tight mb-2">No exercises found</h3>
+                    <p className="text-muted-foreground mb-6 font-medium italic opacity-60">Try adjusting your filters or create a new custom exercise.</p>
                 </div>
             )}
         </div>

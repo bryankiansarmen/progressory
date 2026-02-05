@@ -29,6 +29,11 @@ model Exercise {
   muscleGroup String
   equipment   String?
   
+  // Hierarchical grouping
+  parentId    String?
+  parent      Exercise? @relation("Variations", fields: [parentId], references: [id])
+  variations  Exercise[] @relation("Variations")
+  
   // Custom exercises linked to a user
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])

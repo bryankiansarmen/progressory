@@ -1,5 +1,7 @@
 import { getDashboardStats } from "@/services/stats.service";
+import { getActiveProgram, getProgramProgress } from "@/services/program.service";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
+import ActiveProgramCard from "@/components/dashboard/ActiveProgramCard";
 import ConsistencyChart from "@/components/dashboard/ConsistencyChart";
 import RecentPRList from "@/components/dashboard/RecentPRList";
 import QuickActions from "@/components/dashboard/QuickActions";
@@ -8,6 +10,8 @@ import { Dumbbell, Flame, TrendingUp } from "lucide-react";
 export default async function DashboardPage() {
   const userId = "user_123"; // Mock
   const stats = await getDashboardStats(userId);
+  const activeProgram = await getActiveProgram(userId);
+  const programProgress = activeProgram ? await getProgramProgress(activeProgram.id) : null;
 
   return (
     <main className="min-h-screen bg-background text-foreground pb-20">
@@ -53,6 +57,13 @@ export default async function DashboardPage() {
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left Column: Progress & PRs */}
         <div className="lg:col-span-8 space-y-12">
+          {activeProgram && programProgress && (
+            <ActiveProgramCard 
+              program={activeProgram} 
+              progress={programProgress} 
+            />
+          )}
+
           <ConsistencyChart days={stats.activityDays} />
 
           <div className="space-y-6">

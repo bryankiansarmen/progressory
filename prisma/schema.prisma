@@ -20,6 +20,7 @@ model User {
   workouts     Workout[]
   workoutLogs  WorkoutLog[]
   customExercises Exercise[]
+  programs     Program[]
 }
 
 model Exercise {
@@ -61,6 +62,9 @@ model Workout {
   // A workout template has a list of planned exercises
   exercises WorkoutExercise[]
   
+  // A workout can be part of many programs
+  programDays ProgramDay[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -87,6 +91,10 @@ model WorkoutLog {
   
   workoutId String
   workout   Workout  @relation(fields: [workoutId], references: [id])
+
+  // Optional link to a specific day in a program
+  programDayId String?
+  programDay   ProgramDay? @relation(fields: [programDayId], references: [id])
   
   // Normalization: Log contains entries
   entries   WorkoutLogEntry[]
@@ -118,6 +126,36 @@ model Set {
   
   logEntryId String
   logEntry   WorkoutLogEntry @relation(fields: [logEntryId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Program {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  isActive    Boolean  @default(false)
+  
+  days        ProgramDay[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProgramDay {
+  id        String   @id @default(cuid())
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  
+  workoutId String
+  workout   Workout  @relation(fields: [workoutId], references: [id])
+  
+  dayNumber Int      // Sequence of days
+  
+  logs      WorkoutLog[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -17,6 +17,7 @@ export interface Workout {
     name: string;
     userId: string;
     exercises?: WorkoutExercise[];
+    programDays?: ProgramDay[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -37,6 +38,8 @@ export interface WorkoutLog {
     duration?: number | null;
     userId: string;
     workoutId: string;
+    programDayId?: string | null;
+    programDay?: ProgramDay;
     entries?: WorkoutLogEntry[];
     createdAt: Date;
     updatedAt: Date;
@@ -58,6 +61,28 @@ export interface Set {
     weight: number;
     isDone: boolean;
     logEntryId: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface Program {
+    id: string;
+    name: string;
+    description: string | null;
+    userId: string;
+    isActive: boolean;
+    days?: ProgramDay[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface ProgramDay {
+    id: string;
+    programId: string;
+    workoutId: string;
+    workout?: Workout;
+    dayNumber: number;
+    logs?: WorkoutLog[];
     createdAt: Date;
     updatedAt: Date;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Dumbbell, ClipboardList, History } from "lucide-react";
+import { Home, Dumbbell, ClipboardList, History, LayoutList } from "lucide-react";
 import { useActiveRoute } from "@/hooks/useActiveRoute";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ export default function BottomNav() {
         { icon: <Home className="w-6 h-6" />, label: "Home", href: "/" },
         { icon: <Dumbbell className="w-6 h-6" />, label: "Library", href: "/exercises" },
         { icon: <ClipboardList className="w-6 h-6" />, label: "Routines", href: "/workouts" },
+        { icon: <LayoutList className="w-6 h-6" />, label: "Programs", href: "/programs" },
         { icon: <History className="w-6 h-6" />, label: "History", href: "/history" },
     ];
 

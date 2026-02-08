@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Search, List, ArrowRight } from "lucide-react";
+import { Search, List, ArrowRight, LayoutList } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -20,12 +20,20 @@ export default function QuickActions() {
             icon: <List className="w-6 h-6" />,
             href: "/workouts",
             color: "primary"
+        },
+        {
+            title: "Training Programs",
+            description: "Follow a multi-week training plan",
+            icon: <LayoutList className="w-6 h-6" />,
+            href: "/programs",
+            color: "amber"
         }
     ];
 
     const colorStyles = {
         primary: "hover:border-primary/50 bg-primary/5 text-primary",
         blue: "hover:border-blue-500/50 bg-blue-500/5 text-blue-600",
+        amber: "hover:border-amber-500/50 bg-amber-500/5 text-amber-600",
     };
 
     return (

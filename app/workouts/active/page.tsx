@@ -3,11 +3,11 @@ import WorkoutPlayerContainer from "@/components/workout/player/WorkoutPlayerCon
 import { redirect } from "next/navigation";
 
 interface ActiveWorkoutPageProps {
-    searchParams: Promise<{ workoutId?: string }>;
+    searchParams: Promise<{ workoutId?: string; programDayId?: string }>;
 }
 
 export default async function ActiveWorkoutPage({ searchParams }: ActiveWorkoutPageProps) {
-    const { workoutId } = await searchParams;
+    const { workoutId, programDayId } = await searchParams;
 
     if (!workoutId) {
         redirect("/workouts");
@@ -21,7 +21,10 @@ export default async function ActiveWorkoutPage({ searchParams }: ActiveWorkoutP
 
     return (
         <main className="min-h-screen bg-background">
-            <WorkoutPlayerContainer template={template} />
+            <WorkoutPlayerContainer 
+                template={template} 
+                programDayId={programDayId} 
+            />
         </main>
     );
 }

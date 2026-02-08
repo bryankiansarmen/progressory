@@ -14,6 +14,7 @@ import { useEffect } from "react";
 
 interface WorkoutPlayerContainerProps {
     template: Workout;
+    programDayId?: string | null;
 }
 
 export interface SetRecord {
@@ -27,7 +28,7 @@ export interface ExerciseSession {
     sets: SetRecord[];
 }
 
-export default function WorkoutPlayerContainer({ template }: WorkoutPlayerContainerProps) {
+export default function WorkoutPlayerContainer({ template, programDayId }: WorkoutPlayerContainerProps) {
     const router = useRouter();
     const { formattedTime, seconds } = useWorkoutTimer();
 
@@ -97,6 +98,7 @@ export default function WorkoutPlayerContainer({ template }: WorkoutPlayerContai
                 workoutId: template.id,
                 userId: "user_123", // Mock
                 duration: Math.floor(seconds / 60),
+                programDayId: programDayId || undefined,
                 entries: sessionData.map(ed => ({
                     exerciseId: ed.exercise.id,
                     sets: ed.sets.filter(s => s.isDone).map(s => ({

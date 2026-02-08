@@ -6,6 +6,7 @@ interface LogWorkoutData {
     workoutId: string;
     userId: string;
     duration: number; // minutes
+    programDayId?: string;
     entries: {
         exerciseId: string;
         sets: {
@@ -25,6 +26,7 @@ export const logWorkout = async (data: LogWorkoutData) => {
             workoutId: data.workoutId,
             userId: data.userId,
             duration: data.duration,
+            programDayId: data.programDayId,
             entries: {
                 create: data.entries.map((entry) => ({
                     exerciseId: entry.exerciseId,

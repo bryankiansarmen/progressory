@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Exercise } from "@/types";
+import { Workout, Exercise } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, Trash2, Plus, Save, Loader2, Dumbbell } from "lucide-react";
 import ExercisePicker from "@/components/exercise/ExercisePicker";
-import { createWorkout } from "@/services/workout.service";
+import { createWorkout, updateWorkout } from "@/services/workout.service";
 import { useRouter } from "next/navigation";
 
 interface WorkoutBuilderContainerProps {
-    // No props needed for now
+    initialData?: Workout;
 }
 
-export default function WorkoutBuilderContainer({ }: WorkoutBuilderContainerProps) {
+export default function WorkoutBuilderContainer({ initialData }: WorkoutBuilderContainerProps) {
     const router = useRouter();
-    const [workoutName, setWorkoutName] = useState("");
-    const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+    const [workoutName, setWorkoutName] = useState(initialData?.name || "");
+    const [selectedExercises, setSelectedExercises] = useState<Exercise[]>(
+        initialData?.exercises?.map(we => we.exercise).filter((e): e is Exercise => !!e) || []
+    );
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -50,14 +52,24 @@ export default function WorkoutBuilderContainer({ }: WorkoutBuilderContainerProp
 
         setIsSaving(true);
         try {
-            await createWorkout({
-                name: workoutName,
-                userId: "user_123", // Mock
-                exercises: selectedExercises.map((ex, index) => ({
-                    exerciseId: ex.id,
-                    order: index,
-                })),
-            });
+            if (initialData) {
+                await updateWorkout(initialData.id, {
+                    name: workoutName,
+                    exercises: selectedExercises.map((ex, index) => ({
+                        exerciseId: ex.id,
+                        order: index,
+                    })),
+                });
+            } else {
+                await createWorkout({
+                    name: workoutName,
+                    userId: "user_123", // Mock
+                    exercises: selectedExercises.map((ex, index) => ({
+                        exerciseId: ex.id,
+                        order: index,
+                    })),
+                });
+            }
             router.push("/workouts");
             router.refresh();
         } catch (error) {

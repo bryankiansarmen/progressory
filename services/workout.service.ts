@@ -81,3 +81,36 @@ export const deleteWorkout = async (id: string): Promise<void> => {
         where: { id },
     });
 };
+
+/**
+ * Updates an existing workout template.
+ * Uses a "replace-all" strategy for exercises: deletes all existing links and re-creates them.
+ */
+export const updateWorkout = async (id: string, data: {
+    name: string;
+    exercises: { exerciseId: string; order: number }[];
+}): Promise<Workout> => {
+    return await db.workout.update({
+        where: { id },
+        data: {
+            name: data.name,
+            exercises: {
+                deleteMany: {}, // Remove all existing exercises
+                create: data.exercises.map((item) => ({
+                    exerciseId: item.exerciseId,
+                    order: item.order,
+                })),
+            },
+        },
+        include: {
+            exercises: {
+                include: {
+                    exercise: true,
+                },
+                orderBy: {
+                    order: 'asc'
+                }
+            },
+        },
+    }) as any;
+};

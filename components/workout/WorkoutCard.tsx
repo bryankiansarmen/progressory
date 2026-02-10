@@ -4,7 +4,7 @@ import { Workout } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, PlayCircle, Trash2 } from "lucide-react";
+import { Dumbbell, PlayCircle, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 
 interface WorkoutCardProps {
@@ -40,6 +40,11 @@ export default function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
                     <Button className="w-full gap-2 shadow-md hover:shadow-primary/20">
                         <PlayCircle className="w-4 h-4" />
                         Start
+                    </Button>
+                </Link>
+                <Link href={`/workouts/${workout.id}/edit`}>
+                    <Button variant="outline" size="icon" className="shrink-0 border-2">
+                        <Pencil className="w-4 h-4" />
                     </Button>
                 </Link>
                 <Button

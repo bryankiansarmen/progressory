@@ -1,4 +1,4 @@
-# Workout Tracker
+# Progressory
 
 A modern, full-stack workout tracking application built with **Next.js 15+**, **TypeScript**, and **SQLite**. Designed for efficiency and ease of use, it allows users to plan workouts, log sessions in real-time, and track progress over time.
 

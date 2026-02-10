@@ -1,4 +1,4 @@
-Workout Tracker - Project Specification
+Progressory - Project Specification
 
 *Comprehensive Technical Documentation*
 

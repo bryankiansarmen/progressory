@@ -5,10 +5,84 @@ import { Workout, Exercise } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, Trash2, Plus, Save, Loader2, Dumbbell } from "lucide-react";
+import { Trash2, Plus, Save, Loader2, Dumbbell, GripVertical } from "lucide-react";
 import ExercisePicker from "@/components/exercise/ExercisePicker";
 import { createWorkout, updateWorkout } from "@/services/workout.service";
 import { useRouter } from "next/navigation";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface SortableExerciseItemProps {
+    exercise: Exercise;
+    index: number;
+    onRemove: (index: number) => void;
+}
+
+function SortableExerciseItem({ exercise, index, onRemove }: SortableExerciseItemProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: `${exercise.id}-${index}` });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+    };
+
+    return (
+        <Card
+            ref={setNodeRef}
+            style={style}
+            className={`p-4 flex items-center justify-between group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2 ${isDragging ? "opacity-50 shadow-2xl border-primary" : ""}`}
+        >
+            <div className="flex items-center gap-4">
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-muted-foreground hover:text-primary transition-colors"
+                >
+                    <GripVertical className="w-5 h-5" />
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                    {index + 1}
+                </div>
+                <div className="flex flex-col">
+                    <span className="font-bold">{exercise.name}</span>
+                    <span className="text-xs text-muted-foreground">{exercise.muscleGroup} • {exercise.category}</span>
+                </div>
+            </div>
+
+            <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => onRemove(index)}
+            >
+                <Trash2 className="w-4 h-4" />
+            </Button>
+        </Card>
+    );
+}
 
 interface WorkoutBuilderContainerProps {
     initialData?: Workout;
@@ -22,6 +96,13 @@ export default function WorkoutBuilderContainer({ initialData }: WorkoutBuilderC
     );
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const handleAddExercise = (exercise: Exercise) => {
         setSelectedExercises([...selectedExercises, exercise]);
@@ -37,14 +118,17 @@ export default function WorkoutBuilderContainer({ initialData }: WorkoutBuilderC
         setSelectedExercises(selectedExercises.filter((_, i) => i !== index));
     };
 
-    const handleMove = (index: number, direction: "up" | "down") => {
-        const newItems = [...selectedExercises];
-        const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
 
-        if (targetIndex < 0 || targetIndex >= newItems.length) return;
+        if (over && active.id !== over.id) {
+            setSelectedExercises((items) => {
+                const oldIndex = items.findIndex((_, idx) => `${items[idx].id}-${idx}` === active.id);
+                const newIndex = items.findIndex((_, idx) => `${items[idx].id}-${idx}` === over.id);
 
-        [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
-        setSelectedExercises(newItems);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
     };
 
     const handleSave = async () => {
@@ -71,7 +155,6 @@ export default function WorkoutBuilderContainer({ initialData }: WorkoutBuilderC
                 });
             }
             router.push("/workouts");
-            router.refresh();
         } catch (error) {
             console.error("Failed to save workout:", error);
         } finally {
@@ -104,33 +187,27 @@ export default function WorkoutBuilderContainer({ initialData }: WorkoutBuilderC
                     </div>
 
                     {selectedExercises.length > 0 ? (
-                        <div className="space-y-3">
-                            {selectedExercises.map((ex, index) => (
-                                <Card key={`${ex.id}-${index}`} className="p-4 flex items-center justify-between group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                                            {index + 1}
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-bold">{ex.name}</span>
-                                            <span className="text-xs text-muted-foreground">{ex.muscleGroup} • {ex.category}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button variant="ghost" size="icon" onClick={() => handleMove(index, "up")} disabled={index === 0}>
-                                            <ArrowUp className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleMove(index, "down")} disabled={index === selectedExercises.length - 1}>
-                                            <ArrowDown className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExercise(index)}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={selectedExercises.map((ex, index) => `${ex.id}-${index}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-3">
+                                    {selectedExercises.map((ex, index) => (
+                                        <SortableExerciseItem
+                                            key={`${ex.id}-${index}`}
+                                            exercise={ex}
+                                            index={index}
+                                            onRemove={handleRemoveExercise}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                     ) : (
                         <div className="py-20 text-center border-4 border-dashed rounded-3xl bg-card/20">
                             <p className="text-muted-foreground italic mb-6">Your routine is empty. Time to add some gains!</p>

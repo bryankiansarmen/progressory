@@ -4,8 +4,10 @@ import { Workout } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, PlayCircle, Trash2, Pencil } from "lucide-react";
+import { Dumbbell, PlayCircle, Trash2, Pencil, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { deleteWorkout } from "@/services/workout.service";
+import { useState } from "react";
 
 interface WorkoutCardProps {
     workout: Workout;
@@ -13,7 +15,25 @@ interface WorkoutCardProps {
 }
 
 export default function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
+    const [isDeleting, setIsDeleting] = useState(false);
     const exerciseCount = workout.exercises?.length || 0;
+
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete "${workout.name}"?`)) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            await deleteWorkout(workout.id);
+            onDelete?.(workout.id);
+        } catch (error) {
+            console.error("Failed to delete workout:", error);
+            alert("Failed to delete workout. Please try again.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     return (
         <Card className="overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-card to-card/50">
@@ -51,9 +71,10 @@ export default function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
                     variant="outline"
                     size="icon"
                     className="shrink-0 border-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-                    onClick={() => onDelete?.(workout.id)}
+                    onClick={handleDelete}
+                    disabled={isDeleting}
                 >
-                    <Trash2 className="w-4 h-4" />
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </Button>
             </CardFooter>
         </Card>

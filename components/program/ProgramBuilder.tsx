@@ -9,6 +9,89 @@ import { Card } from "@/components/ui/card";
 import { Trash2, Plus, Save, Loader2, LayoutList, GripVertical } from "lucide-react";
 import { createProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface SortableProgramDayProps {
+    day: { workoutId: string; dayNumber: number };
+    index: number;
+    workouts: Workout[];
+    onUpdate: (index: number, workoutId: string) => void;
+    onRemove: (index: number) => void;
+}
+
+function SortableProgramDay({ day, index, workouts, onUpdate, onRemove }: SortableProgramDayProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: `day-${index}` });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : undefined,
+    };
+
+    return (
+        <Card
+            ref={setNodeRef}
+            style={style}
+            className={`p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2 ${isDragging ? "opacity-50 shadow-2xl border-primary" : ""}`}
+        >
+            <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-muted-foreground hover:text-primary transition-colors"
+            >
+                <GripVertical className="w-5 h-5" />
+            </div>
+
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
+                {day.dayNumber}
+            </div>
+            
+            <div className="flex-1">
+                <select 
+                    className="w-full bg-transparent font-bold focus:outline-none cursor-pointer"
+                    value={day.workoutId}
+                    onChange={(e) => onUpdate(index, e.target.value)}
+                >
+                    {workouts.map(w => (
+                        <option key={w.id} value={w.id}>{w.name}</option>
+                    ))}
+                </select>
+            </div>
+
+            <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => onRemove(index)}
+            >
+                <Trash2 className="w-4 h-4" />
+            </Button>
+        </Card>
+    );
+}
 
 interface ProgramBuilderProps {
     workouts: Workout[];
@@ -20,6 +103,13 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
     const [description, setDescription] = useState("");
     const [days, setDays] = useState<{ workoutId: string; dayNumber: number }[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const handleAddDay = () => {
         if (workouts.length === 0) return;
@@ -40,6 +130,25 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
         setDays(newDays);
     };
 
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setDays((items) => {
+                const oldIndex = items.findIndex((_, idx) => `day-${idx}` === active.id);
+                const newIndex = items.findIndex((_, idx) => `day-${idx}` === over.id);
+
+                const reorderedItems = arrayMove(items, oldIndex, newIndex);
+                
+                // Update dayNumber based on new sequence
+                return reorderedItems.map((item, idx) => ({
+                    ...item,
+                    dayNumber: idx + 1
+                }));
+            });
+        }
+    };
+
     const handleSave = async () => {
         if (!name || days.length === 0) return;
 
@@ -52,7 +161,6 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
                 days: days
             });
             router.push("/programs");
-            router.refresh();
         } catch (error) {
             console.error("Failed to save program:", error);
         } finally {
@@ -96,31 +204,29 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
                     </div>
 
                     {days.length > 0 ? (
-                        <div className="space-y-3">
-                            {days.map((day, index) => (
-                                <Card key={index} className="p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2">
-                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
-                                        {day.dayNumber}
-                                    </div>
-                                    
-                                    <div className="flex-1">
-                                        <select 
-                                            className="w-full bg-transparent font-bold focus:outline-none cursor-pointer"
-                                            value={day.workoutId}
-                                            onChange={(e) => handleUpdateDay(index, e.target.value)}
-                                        >
-                                            {workouts.map(w => (
-                                                <option key={w.id} value={w.id}>{w.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleRemoveDay(index)}>
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                </Card>
-                            ))}
-                        </div>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={days.map((_, index) => `day-${index}`)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-3">
+                                    {days.map((day, index) => (
+                                        <SortableProgramDay
+                                            key={`day-${index}`}
+                                            day={day}
+                                            index={index}
+                                            workouts={workouts}
+                                            onUpdate={handleUpdateDay}
+                                            onRemove={handleRemoveDay}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                     ) : (
                         <div className="py-20 text-center border-4 border-dashed rounded-3xl bg-card/20">
                             <p className="text-muted-foreground italic mb-6">No days scheduled yet.</p>

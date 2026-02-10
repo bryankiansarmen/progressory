@@ -44,7 +44,7 @@ A modern, full-stack workout tracking application built with **Next.js 15+**, **
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd workout-tracker
+   cd progressory
    ```
 
 2. **Install dependencies**:

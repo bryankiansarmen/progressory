@@ -2,6 +2,7 @@
 
 import db from "@/lib/db";
 import { Workout } from "@/types";
+import { revalidatePath } from "next/cache";
 
 /**
  * Fetch all workout templates belonging to a specific user.
@@ -52,7 +53,7 @@ export const createWorkout = async (data: {
     userId: string;
     exercises: { exerciseId: string; order: number }[];
 }): Promise<Workout> => {
-    return await db.workout.create({
+    const result = await db.workout.create({
         data: {
             name: data.name,
             userId: data.userId,
@@ -71,6 +72,9 @@ export const createWorkout = async (data: {
             },
         },
     }) as any;
+
+    revalidatePath("/workouts");
+    return result;
 };
 
 /**
@@ -80,6 +84,7 @@ export const deleteWorkout = async (id: string): Promise<void> => {
     await db.workout.delete({
         where: { id },
     });
+    revalidatePath("/workouts");
 };
 
 /**
@@ -90,7 +95,7 @@ export const updateWorkout = async (id: string, data: {
     name: string;
     exercises: { exerciseId: string; order: number }[];
 }): Promise<Workout> => {
-    return await db.workout.update({
+    const result = await db.workout.update({
         where: { id },
         data: {
             name: data.name,
@@ -113,4 +118,7 @@ export const updateWorkout = async (id: string, data: {
             },
         },
     }) as any;
+
+    revalidatePath("/workouts");
+    return result;
 };

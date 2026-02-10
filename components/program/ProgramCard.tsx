@@ -4,9 +4,9 @@ import { Program } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutList, Trash2, CheckCircle2, PlayCircle } from "lucide-react";
+import { LayoutList, Trash2, CheckCircle2, PlayCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { enrollInProgram } from "@/services/program.service";
+import { enrollInProgram, deleteProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,17 +18,34 @@ interface ProgramCardProps {
 export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
     const router = useRouter();
     const [isEnrolling, setIsEnrolling] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const dayCount = program.days?.length || 0;
 
     const handleEnroll = async () => {
         setIsEnrolling(true);
         try {
             await enrollInProgram(program.userId, program.id);
-            router.refresh();
         } catch (error) {
             console.error("Failed to enroll in program:", error);
         } finally {
             setIsEnrolling(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete "${program.name}"?`)) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            await deleteProgram(program.id);
+            onDelete?.(program.id);
+        } catch (error) {
+            console.error("Failed to delete program:", error);
+            alert("Failed to delete program. Please try again.");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -81,9 +98,10 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
                     variant="outline"
                     size="icon"
                     className="shrink-0 border-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-                    onClick={() => onDelete?.(program.id)}
+                    onClick={handleDelete}
+                    disabled={isDeleting}
                 >
-                    <Trash2 className="w-4 h-4" />
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </Button>
             </CardFooter>
         </Card>

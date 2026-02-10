@@ -2,6 +2,7 @@
 
 import db from "@/lib/db";
 import { Program } from "@/types";
+import { revalidatePath } from "next/cache";
 
 /**
  * Fetch all programs belonging to a specific user.
@@ -59,7 +60,7 @@ export const createProgram = async (data: {
     userId: string;
     days: { workoutId: string; dayNumber: number }[];
 }): Promise<Program> => {
-    return await db.program.create({
+    const result = await db.program.create({
         data: {
             name: data.name,
             description: data.description,
@@ -75,6 +76,9 @@ export const createProgram = async (data: {
             days: true,
         },
     }) as any;
+
+    revalidatePath("/programs");
+    return result;
 };
 
 /**
@@ -84,6 +88,7 @@ export const deleteProgram = async (id: string): Promise<void> => {
     await db.program.delete({
         where: { id },
     });
+    revalidatePath("/programs");
 };
 
 /**
@@ -104,6 +109,7 @@ export const enrollInProgram = async (userId: string, programId: string): Promis
             data: { isActive: true }
         })
     ]);
+    revalidatePath("/programs");
 };
 
 /**

@@ -16,14 +16,19 @@ The system SHALL allow users to create a new workout template with a unique name
 #### Scenario: Creation Flow
 - **WHEN** the user submits a new workout with a name and a list of exercises
 - **THEN** the system SHALL create a `Workout` record 
-- **AND** create `WorkoutExercise` records for each selected exercise with correct `order`.
+- **AND** create `WorkoutExercise` records for each selected exercise with correct `order`
+- **AND** the system SHALL revalidate the `/workouts` path on the server.
 
 ### Requirement: Delete Template
-The system SHALL allow users to delete their workout templates.
+The system SHALL allow users to delete their workout templates with a confirmation step.
 
 #### Scenario: Deletion
 - **WHEN** the user clicks "Delete" on a workout card
-- **THEN** the system SHALL remove the template and its associated exercise mappings.
+- **AND** they confirm the action in the browser dialog
+- **THEN** the system SHALL call the `deleteWorkout` action
+- **AND** the UI SHALL show a loading state on the button
+- **AND** the template SHALL be removed from the view upon success.
+- **AND** the system SHALL revalidate the `/workouts` path on the server.
 
 ### Requirement: Edit Existing Template
 The system SHALL allow users to modify the name and exercises of an existing workout template.
@@ -33,6 +38,7 @@ The system SHALL allow users to modify the name and exercises of an existing wor
 - **THEN** the builder loads with the template's current name and exercises
 - **WHEN** the user modifies the list and clicks "Save"
 - **THEN** the changes are persisted to the database
+- **AND** the system SHALL revalidate the `/workouts` path on the server
 - **AND** the user is redirected to `/workouts`.
 
 #### Scenario: Invalid ID
@@ -47,4 +53,12 @@ The system SHALL provide a clear way to navigate to the edit page from the templ
 - **THEN** they see an "Edit" button
 - **WHEN** they click it
 - **THEN** they are navigated to `/workouts/[id]/edit`.
+
+### Requirement: Reorder Exercises via Drag and Drop
+The system SHALL allow users to reorder exercises within a workout template using a drag-and-drop interface.
+
+#### Scenario: Reordering in Builder
+- **WHEN** the user drags an exercise card to a new position in the list
+- **THEN** the exercise list SHALL update to reflect the new sequence
+- **AND** saving the workout SHALL persist the updated order.
 

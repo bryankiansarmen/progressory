@@ -2,12 +2,13 @@ import { getProgramById, getProgramProgress } from "@/services/program.service";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle2, LayoutList, ArrowLeft } from "lucide-react";
+import { PlayCircle, CheckCircle2, LayoutList, ArrowLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function ProgramDetailsPage({ params }: { params: { id: string } }) {
-    const program = await getProgramById(params.id);
+export default async function ProgramDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const program = await getProgramById(id);
 
     if (!program) {
         notFound();
@@ -18,10 +19,19 @@ export default async function ProgramDetailsPage({ params }: { params: { id: str
     return (
         <main className="min-h-screen bg-background">
             <div className="container mx-auto py-8 px-4">
-                <Link href="/programs" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-6 transition-colors">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Library
-                </Link>
+                <div className="flex items-center justify-between mb-6">
+                    <Link href="/programs" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Library
+                    </Link>
+
+                    <Link href={`/programs/${id}/edit`}>
+                        <Button variant="outline" size="sm" className="gap-2 rounded-full border-2">
+                            <Edit2 className="w-4 h-4" />
+                            Edit Program
+                        </Button>
+                    </Link>
+                </div>
 
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                     <div className="space-y-2">

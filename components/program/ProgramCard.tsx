@@ -4,7 +4,7 @@ import { Program } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LayoutList, Trash2, CheckCircle2, PlayCircle, Loader2 } from "lucide-react";
+import { LayoutList, Trash2, CheckCircle2, PlayCircle, Loader2, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { enrollInProgram, deleteProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
@@ -94,6 +94,15 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
                         Current Program
                     </Button>
                 )}
+                <Link href={`/programs/${program.id}/edit`} className="contents">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0 border-2 hover:border-primary/50 transition-colors"
+                    >
+                        <Edit2 className="w-4 h-4" />
+                    </Button>
+                </Link>
                 <Button
                     variant="outline"
                     size="icon"

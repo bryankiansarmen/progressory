@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Trash2, Plus, Save, Loader2, LayoutList, GripVertical } from "lucide-react";
-import { createProgram } from "@/services/program.service";
+import { createProgram, updateProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
 import {
     DndContext,
@@ -28,7 +28,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 interface SortableProgramDayProps {
-    day: { workoutId: string; dayNumber: number };
+    day: { id?: string; workoutId: string; dayNumber: number };
     index: number;
     workouts: Workout[];
     onUpdate: (index: number, workoutId: string) => void;
@@ -95,14 +95,22 @@ function SortableProgramDay({ day, index, workouts, onUpdate, onRemove }: Sortab
 
 interface ProgramBuilderProps {
     workouts: Workout[];
+    initialData?: any;
 }
 
-export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
+export default function ProgramBuilder({ workouts, initialData }: ProgramBuilderProps) {
     const router = useRouter();
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [days, setDays] = useState<{ workoutId: string; dayNumber: number }[]>([]);
+    const [name, setName] = useState(initialData?.name || "");
+    const [description, setDescription] = useState(initialData?.description || "");
+    const [days, setDays] = useState<{ id?: string; workoutId: string; dayNumber: number }[]>(
+        initialData?.days?.map((d: any) => ({
+            id: d.id,
+            workoutId: d.workoutId,
+            dayNumber: d.dayNumber
+        })) || []
+    );
     const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -153,16 +161,27 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
         if (!name || days.length === 0) return;
 
         setIsSaving(true);
+        setError(null);
         try {
-            await createProgram({
-                name,
-                description,
-                userId: "user_123", // Mock
-                days: days
-            });
-            router.push("/programs");
-        } catch (error) {
+            if (initialData?.id) {
+                await updateProgram(initialData.id, {
+                    name,
+                    description,
+                    days: days
+                });
+                router.push(`/programs/${initialData.id}`);
+            } else {
+                await createProgram({
+                    name,
+                    description,
+                    userId: "user_123", // Mock
+                    days: days
+                });
+                router.push("/programs");
+            }
+        } catch (error: any) {
             console.error("Failed to save program:", error);
+            setError(error.message || "Failed to save program");
         } finally {
             setIsSaving(false);
         }
@@ -171,6 +190,11 @@ export default function ProgramBuilder({ workouts }: ProgramBuilderProps) {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
+                {error && (
+                    <div className="p-4 bg-destructive/10 border-2 border-destructive/20 text-destructive rounded-xl font-medium">
+                        {error}
+                    </div>
+                )}
                 <Card className="p-6 border-none shadow-xl bg-gradient-to-r from-primary/5 to-transparent space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground ml-1">Program Name</label>

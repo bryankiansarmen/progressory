@@ -54,3 +54,24 @@ The system SHALL allow users to delete their training programs with a confirmati
 - **AND** the UI SHALL show a loading state on the button
 - **AND** the program SHALL be removed from the view upon success.
 - **AND** the system SHALL revalidate the `/programs` path on the server.
+
+### Requirement: Edit Program Lifecycle
+The system SHALL support the full lifecycle of a training program, allowing it to be updated after initial creation.
+
+#### Scenario: Editing an existing program
+- **WHEN** a user navigates to the Edit route for a program
+- **THEN** the system SHALL load the existing program data into the `ProgramBuilder`
+- **AND** allowing the user to save changes to the existing record instead of creating a new one.
+
+### Requirement: Async Dynamic Params
+The system SHALL handle `params` and `searchParams` in dynamic routes as Promises to comply with Next.js 15+ requirements.
+
+#### Scenario: Navigating to Program Details
+- **WHEN** a user navigates to `/programs/[id]`
+- **THEN** the system MUST await the `params` Promise to extract the `id`
+- **AND** use that `id` to fetch the program data from the database.
+
+#### Scenario: Navigating to Program Edit
+- **WHEN** a user navigates to `/programs/[id]/edit`
+- **THEN** the system MUST await the `params` Promise to extract the `id`
+- **AND** use that `id` to fetch the program data for the editor.

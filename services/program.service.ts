@@ -92,6 +92,89 @@ export const deleteProgram = async (id: string): Promise<void> => {
 };
 
 /**
+ * Updates an existing training program.
+ */
+export const updateProgram = async (id: string, data: {
+    name: string;
+    description?: string;
+    days: { id?: string; workoutId: string; dayNumber: number }[];
+}): Promise<Program> => {
+    const result = await db.$transaction(async (tx) => {
+        // 1. Update basic metadata
+        const program = await tx.program.update({
+            where: { id },
+            data: {
+                name: data.name,
+                description: data.description,
+            },
+            include: {
+                days: true,
+            },
+        });
+
+        // 2. Fetch existing days
+        const existingDays = program.days;
+        const incomingDayIds = data.days.map(d => d.id).filter(Boolean) as string[];
+
+        // 3. Identify days to delete
+        const daysToDelete = existingDays.filter(ed => !incomingDayIds.includes(ed.id));
+        
+        // Check if any days to delete have logs
+        for (const day of daysToDelete) {
+            const logsCount = await tx.workoutLog.count({
+                where: { programDayId: day.id }
+            });
+            if (logsCount > 0) {
+                throw new Error(`Cannot delete Day ${day.dayNumber} because it has associated workout logs.`);
+            }
+        }
+
+        // 4. Delete removed days
+        if (daysToDelete.length > 0) {
+            await tx.programDay.deleteMany({
+                where: { id: { in: daysToDelete.map(d => d.id) } }
+            });
+        }
+
+        // 5. Update or Create days
+        for (const incomingDay of data.days) {
+            if (incomingDay.id) {
+                // Update existing day
+                await tx.programDay.update({
+                    where: { id: incomingDay.id },
+                    data: {
+                        workoutId: incomingDay.workoutId,
+                        dayNumber: incomingDay.dayNumber,
+                    }
+                });
+            } else {
+                // Create new day
+                await tx.programDay.create({
+                    data: {
+                        programId: id,
+                        workoutId: incomingDay.workoutId,
+                        dayNumber: incomingDay.dayNumber,
+                    }
+                });
+            }
+        }
+
+        return await tx.program.findUnique({
+            where: { id },
+            include: {
+                days: {
+                    orderBy: { dayNumber: 'asc' }
+                }
+            }
+        });
+    }) as any;
+
+    revalidatePath("/programs");
+    revalidatePath(`/programs/${id}`);
+    return result;
+};
+
+/**
  * Enrolls a user in a program, making it the active one.
  * Clears active status from all other programs for that user.
  */

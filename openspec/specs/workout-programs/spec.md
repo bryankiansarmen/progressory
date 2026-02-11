@@ -75,3 +75,11 @@ The system SHALL handle `params` and `searchParams` in dynamic routes as Promise
 - **WHEN** a user navigates to `/programs/[id]/edit`
 - **THEN** the system MUST await the `params` Promise to extract the `id`
 - **AND** use that `id` to fetch the program data for the editor.
+
+### Requirement: Rest Day Support
+The training program system SHALL support explicit "Rest Days" in the schedule sequence.
+
+#### Scenario: Adding a rest day
+- **WHEN** the user selects "Rest Day" for a program day
+- **THEN** the system SHALL allow saving the program with that day marked as a rest period (no linked workout template)
+- **AND** the UI SHALL visually distinguish the rest day from workout days.

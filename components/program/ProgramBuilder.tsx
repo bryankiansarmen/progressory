@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Trash2, Plus, Save, Loader2, LayoutList, GripVertical } from "lucide-react";
+import { Trash2, Plus, Save, Loader2, LayoutList, GripVertical, ChevronDown, Dumbbell, Coffee } from "lucide-react";
 import { createProgram, updateProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
+import { cn, getWorkoutMuscleGroups } from "@/lib/utils";
+import WorkoutPicker from "./WorkoutPicker";
+import { Badge } from "@/components/ui/badge";
 import {
     DndContext,
     closestCenter,
@@ -28,10 +31,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 interface SortableProgramDayProps {
-    day: { id?: string; workoutId: string; dayNumber: number };
+    day: { id?: string; workoutId: string | null; dayNumber: number };
     index: number;
     workouts: Workout[];
-    onUpdate: (index: number, workoutId: string) => void;
+    onUpdate: (index: number, workoutId: string | null) => void;
     onRemove: (index: number) => void;
 }
 
@@ -45,51 +48,114 @@ function SortableProgramDay({ day, index, workouts, onUpdate, onRemove }: Sortab
         isDragging
     } = useSortable({ id: `day-${index}` });
 
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 50 : undefined,
     };
 
+    const selectedWorkout = workouts.find(w => w.id === day.workoutId);
+    const muscleGroups = selectedWorkout ? getWorkoutMuscleGroups(selectedWorkout) : [];
+    const exerciseCount = selectedWorkout?.exercises?.length || 0;
+    const isRestDay = !day.workoutId;
+
     return (
-        <Card
-            ref={setNodeRef}
-            style={style}
-            className={`p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2 ${isDragging ? "opacity-50 shadow-2xl border-primary" : ""}`}
-        >
-            <div
-                {...attributes}
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-muted-foreground hover:text-primary transition-colors"
+        <div ref={setNodeRef} style={style} className="relative group">
+            <Card
+                className={cn(
+                    "p-4 flex items-center gap-4 group hover:border-primary/30 transition-all bg-card/50 backdrop-blur-sm border-2",
+                    isDragging ? "opacity-50 shadow-2xl border-primary" : "",
+                    isRestDay ? "border-amber-500/20 bg-amber-500/[0.02]" : ""
+                )}
             >
-                <GripVertical className="w-5 h-5" />
-            </div>
-
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0">
-                {day.dayNumber}
-            </div>
-            
-            <div className="flex-1">
-                <select 
-                    className="w-full bg-transparent font-bold focus:outline-none cursor-pointer"
-                    value={day.workoutId}
-                    onChange={(e) => onUpdate(index, e.target.value)}
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-muted-foreground hover:text-primary transition-colors"
                 >
-                    {workouts.map(w => (
-                        <option key={w.id} value={w.id}>{w.name}</option>
-                    ))}
-                </select>
-            </div>
+                    <GripVertical className="w-5 h-5" />
+                </div>
 
-            <Button
-                variant="ghost"
-                size="icon"
-                className="text-destructive hover:bg-destructive/10"
-                onClick={() => onRemove(index)}
-            >
-                <Trash2 className="w-4 h-4" />
-            </Button>
-        </Card>
+                <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center font-bold shrink-0",
+                    isRestDay ? "bg-amber-500/10 text-amber-600" : "bg-primary/10 text-primary"
+                )}>
+                    {day.dayNumber}
+                </div>
+                
+                <div className="flex-1">
+                    <button 
+                        onClick={() => setIsPickerOpen(!isPickerOpen)}
+                        className="w-full text-left group/picker flex flex-col gap-0.5"
+                    >
+                        <div className="flex items-center gap-2">
+                            {isRestDay ? (
+                                <Coffee className="w-4 h-4 text-amber-500" />
+                            ) : (
+                                <Dumbbell className="w-4 h-4 text-primary" />
+                            )}
+                            <span className={cn(
+                                "font-bold text-lg leading-tight",
+                                isRestDay ? "text-amber-600" : "text-foreground"
+                            )}>
+                                {isRestDay ? "Rest Day" : selectedWorkout?.name}
+                            </span>
+                            <ChevronDown className="w-4 h-4 text-muted-foreground opacity-0 group-hover/picker:opacity-100 transition-opacity" />
+                        </div>
+                        
+                        {!isRestDay && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mr-2">
+                                    {exerciseCount} Exercises
+                                </span>
+                                {muscleGroups.slice(0, 3).map(mg => (
+                                    <Badge key={mg} variant="outline" className="text-[8px] px-1 h-3.5 border-primary/20 bg-primary/5 uppercase font-black tracking-tighter">
+                                        {mg}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
+                        {isRestDay && (
+                            <span className="text-[10px] text-amber-500/70 font-bold uppercase tracking-widest">
+                                Recovery Period
+                            </span>
+                        )}
+                    </button>
+                </div>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => onRemove(index)}
+                >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+            </Card>
+
+            {isPickerOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
+                    <div className="w-full max-w-lg bg-card border-2 rounded-3xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold">Assign Workout</h2>
+                            <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsPickerOpen(false)}>
+                                <Plus className="w-4 h-4 rotate-45" />
+                            </Button>
+                        </div>
+                        <WorkoutPicker 
+                            workouts={workouts}
+                            selectedWorkoutId={day.workoutId}
+                            onSelect={(workoutId) => {
+                                onUpdate(index, workoutId);
+                                setIsPickerOpen(false);
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -102,7 +168,7 @@ export default function ProgramBuilder({ workouts, initialData }: ProgramBuilder
     const router = useRouter();
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(initialData?.description || "");
-    const [days, setDays] = useState<{ id?: string; workoutId: string; dayNumber: number }[]>(
+    const [days, setDays] = useState<{ id?: string; workoutId: string | null; dayNumber: number }[]>(
         initialData?.days?.map((d: any) => ({
             id: d.id,
             workoutId: d.workoutId,
@@ -120,8 +186,8 @@ export default function ProgramBuilder({ workouts, initialData }: ProgramBuilder
     );
 
     const handleAddDay = () => {
-        if (workouts.length === 0) return;
-        setDays([...days, { workoutId: workouts[0].id, dayNumber: days.length + 1 }]);
+        // Now allows adding a day even if no workouts exist (it will default to Rest Day)
+        setDays([...days, { workoutId: workouts[0]?.id || null, dayNumber: days.length + 1 }]);
     };
 
     const handleRemoveDay = (index: number) => {
@@ -132,7 +198,7 @@ export default function ProgramBuilder({ workouts, initialData }: ProgramBuilder
         setDays(newDays);
     };
 
-    const handleUpdateDay = (index: number, workoutId: string) => {
+    const handleUpdateDay = (index: number, workoutId: string | null) => {
         const newDays = [...days];
         newDays[index].workoutId = workoutId;
         setDays(newDays);

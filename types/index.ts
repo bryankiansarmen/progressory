@@ -79,8 +79,8 @@ export interface Program {
 export interface ProgramDay {
     id: string;
     programId: string;
-    workoutId: string;
-    workout?: Workout;
+    workoutId?: string | null;
+    workout?: Workout | null;
     dayNumber: number;
     logs?: WorkoutLog[];
     createdAt: Date;

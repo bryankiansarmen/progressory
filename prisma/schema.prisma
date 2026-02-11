@@ -150,8 +150,8 @@ model ProgramDay {
   programId String
   program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
   
-  workoutId String
-  workout   Workout  @relation(fields: [workoutId], references: [id])
+  workoutId String?
+  workout   Workout?  @relation(fields: [workoutId], references: [id])
   
   dayNumber Int      // Sequence of days
   

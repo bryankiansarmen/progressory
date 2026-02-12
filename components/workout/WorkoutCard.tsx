@@ -8,6 +8,7 @@ import { Dumbbell, PlayCircle, Trash2, Pencil, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { deleteWorkout } from "@/services/workout.service";
 import { useState } from "react";
+import { useConfirm } from "@/hooks/useInteraction";
 
 interface WorkoutCardProps {
     workout: Workout;
@@ -16,12 +17,18 @@ interface WorkoutCardProps {
 
 export default function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
     const [isDeleting, setIsDeleting] = useState(false);
+    const confirm = useConfirm();
     const exerciseCount = workout.exercises?.length || 0;
 
     const handleDelete = async () => {
-        if (!window.confirm(`Are you sure you want to delete "${workout.name}"?`)) {
-            return;
-        }
+        const shouldDelete = await confirm({
+            title: "Delete Workout",
+            description: `Are you sure you want to delete "${workout.name}"? This action cannot be undone.`,
+            confirmText: "Delete",
+            variant: "destructive",
+        });
+
+        if (!shouldDelete) return;
 
         setIsDeleting(true);
         try {
@@ -29,7 +36,12 @@ export default function WorkoutCard({ workout, onDelete }: WorkoutCardProps) {
             onDelete?.(workout.id);
         } catch (error) {
             console.error("Failed to delete workout:", error);
-            alert("Failed to delete workout. Please try again.");
+            await confirm({
+                title: "Error",
+                description: "Failed to delete workout. Please try again.",
+                confirmText: "OK",
+                variant: "info",
+            });
         } finally {
             setIsDeleting(false);
         }

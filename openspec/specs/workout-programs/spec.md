@@ -45,11 +45,12 @@ The system SHALL allow users to reorder days within a training program using a d
 - **AND** saving the program SHALL persist the new schedule.
 
 ### Requirement: Delete Program
-The system SHALL allow users to delete their training programs with a confirmation step.
+The system SHALL allow users to delete their training programs using the unified confirmation system.
 
 #### Scenario: Deletion Flow
 - **WHEN** the user clicks "Delete" on a program card
-- **AND** they confirm the action in the browser dialog
+- **THEN** the system SHALL display a confirmation modal
+- **WHEN** the user confirms the action in the modal
 - **THEN** the system SHALL call the `deleteProgram` action
 - **AND** the UI SHALL show a loading state on the button
 - **AND** the program SHALL be removed from the view upon success.

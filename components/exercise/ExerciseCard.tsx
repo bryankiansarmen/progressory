@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dumbbell, Target, Layers, ChevronDown, ChevronUp, Box, MoreVertical, Edit2, Trash2, AlertCircle } from "lucide-react";
 import CreateExerciseDialog from "./CreateExerciseDialog";
+import { useConfirm } from "@/hooks/useInteraction";
 
 interface ExerciseCardProps {
     exercise: Exercise;
@@ -16,6 +17,7 @@ interface ExerciseCardProps {
 export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseArchived }: ExerciseCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showActions, setShowActions] = useState(false);
+    const confirm = useConfirm();
     const hasVariations = (exercise.variations?.length || 0) > 0;
     const isCustom = !!exercise.userId;
 
@@ -48,10 +50,10 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                 {exercise.variations?.length} Variations
                             </Badge>
                         )}
-                        
+
                         {isCustom && (
                             <div className="relative ml-1">
-                                <button 
+                                <button
                                     onClick={() => setShowActions(!showActions)}
                                     className="p-1 hover:bg-primary/10 rounded-full transition-colors text-muted-foreground hover:text-primary"
                                 >
@@ -62,7 +64,7 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                     <>
                                         <div className="fixed inset-0 z-20" onClick={() => setShowActions(false)} />
                                         <div className="absolute right-0 mt-2 w-36 bg-card border-2 rounded-xl shadow-xl z-30 py-1 animate-in zoom-in-95 duration-100 origin-top-right">
-                                            <CreateExerciseDialog 
+                                            <CreateExerciseDialog
                                                 exercise={exercise}
                                                 onExerciseUpdated={(updated) => {
                                                     onExerciseUpdated?.(updated);
@@ -75,9 +77,16 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                                     </button>
                                                 }
                                             />
-                                            <button 
-                                                onClick={() => {
-                                                    if (confirm("Archive this exercise? It will be hidden from the library but kept in your history.")) {
+                                            <button
+                                                onClick={async () => {
+                                                    const shouldArchive = await confirm({
+                                                        title: "Archive Exercise",
+                                                        description: "Archive this exercise? It will be hidden from the library but kept in your history.",
+                                                        confirmText: "Archive",
+                                                        variant: "destructive",
+                                                    });
+
+                                                    if (shouldArchive) {
                                                         onExerciseArchived?.(exercise.id);
                                                     }
                                                     setShowActions(false);
@@ -129,10 +138,10 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                         <Box className="w-3 h-3 text-primary/50" />
                                         <span>{v.name}</span>
                                         <span className="text-[10px] opacity-40 uppercase ml-2">{v.equipment}</span>
-                                        
+
                                         {!!v.userId && (
                                             <div className="ml-auto flex items-center gap-1 opacity-0 group-hover/var:opacity-100 transition-opacity">
-                                                <CreateExerciseDialog 
+                                                <CreateExerciseDialog
                                                     exercise={v}
                                                     onExerciseUpdated={onExerciseUpdated}
                                                     trigger={
@@ -141,9 +150,16 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                                         </button>
                                                     }
                                                 />
-                                                <button 
-                                                    onClick={() => {
-                                                        if (confirm(`Archive "${v.name}"?`)) {
+                                                <button
+                                                    onClick={async () => {
+                                                        const shouldArchive = await confirm({
+                                                            title: "Archive Variation",
+                                                            description: `Archive "${v.name}"?`,
+                                                            confirmText: "Archive",
+                                                            variant: "destructive",
+                                                        });
+
+                                                        if (shouldArchive) {
                                                             onExerciseArchived?.(v.id);
                                                         }
                                                     }}

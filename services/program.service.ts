@@ -58,7 +58,7 @@ export const createProgram = async (data: {
     name: string;
     description?: string;
     userId: string;
-    days: { workoutId: string; dayNumber: number }[];
+    days: { workoutId: string | null; dayNumber: number }[];
 }): Promise<Program> => {
     const result = await db.program.create({
         data: {
@@ -97,7 +97,7 @@ export const deleteProgram = async (id: string): Promise<void> => {
 export const updateProgram = async (id: string, data: {
     name: string;
     description?: string;
-    days: { id?: string; workoutId: string; dayNumber: number }[];
+    days: { id?: string; workoutId: string | null; dayNumber: number }[];
 }): Promise<Program> => {
     const result = await db.$transaction(async (tx) => {
         // 1. Update basic metadata
@@ -118,7 +118,7 @@ export const updateProgram = async (id: string, data: {
 
         // 3. Identify days to delete
         const daysToDelete = existingDays.filter(ed => !incomingDayIds.includes(ed.id));
-        
+
         // Check if any days to delete have logs
         for (const day of daysToDelete) {
             const logsCount = await tx.workoutLog.count({
@@ -224,7 +224,7 @@ export const getProgramProgress = async (programId: string): Promise<{
     const totalDays = program.days.length;
     const completedDays = program.days.filter(day => day.logs.length > 0).length;
     const percentage = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-    
+
     // Find the first day that hasn't been logged yet
     const nextDay = program.days.find(day => day.logs.length === 0);
     const nextDayNumber = nextDay ? nextDay.dayNumber : (totalDays + 1);

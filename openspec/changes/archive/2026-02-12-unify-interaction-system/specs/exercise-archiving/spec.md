@@ -1,9 +1,5 @@
-# exercise-archiving Specification
+## MODIFIED Requirements
 
-## Purpose
-Define requirements for archiving exercises to clean up the library while preserving historical data.
-
-## Requirements
 ### Requirement: Archiving Custom Exercises
 The system SHALL allow users to archive exercises they have created, requiring confirmation to prevent accidental data modification.
 
@@ -13,10 +9,3 @@ The system SHALL allow users to archive exercises they have created, requiring c
 - **WHEN** the user confirms the action
 - **THEN** the exercise SHALL be marked as archived
 - **AND** it SHALL no longer appear in the active exercise library
-
-### Requirement: Preservation in Logs
-Archived exercises SHALL remain visible and identifiable in existing workout logs.
-
-#### Scenario: Historical Data Integrity
-- **WHEN** a user views a past workout containing an archived exercise
-- **THEN** the exercise name and details SHALL still be displayed correctly

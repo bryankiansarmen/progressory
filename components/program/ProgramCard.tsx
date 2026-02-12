@@ -9,6 +9,7 @@ import Link from "next/link";
 import { enrollInProgram, deleteProgram } from "@/services/program.service";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useConfirm } from "@/hooks/useInteraction";
 
 interface ProgramCardProps {
     program: Program;
@@ -19,6 +20,7 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
     const router = useRouter();
     const [isEnrolling, setIsEnrolling] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const confirm = useConfirm();
     const dayCount = program.days?.length || 0;
 
     const handleEnroll = async () => {
@@ -33,9 +35,14 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
     };
 
     const handleDelete = async () => {
-        if (!window.confirm(`Are you sure you want to delete "${program.name}"?`)) {
-            return;
-        }
+        const shouldDelete = await confirm({
+            title: "Delete Program",
+            description: `Are you sure you want to delete "${program.name}"? This action cannot be undone.`,
+            confirmText: "Delete",
+            variant: "destructive",
+        });
+
+        if (!shouldDelete) return;
 
         setIsDeleting(true);
         try {
@@ -43,18 +50,22 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
             onDelete?.(program.id);
         } catch (error) {
             console.error("Failed to delete program:", error);
-            alert("Failed to delete program. Please try again.");
+            await confirm({
+                title: "Error",
+                description: "Failed to delete program. Please try again.",
+                confirmText: "OK",
+                variant: "info",
+            });
         } finally {
             setIsDeleting(false);
         }
     };
 
     return (
-        <Card className={`overflow-hidden border-2 transition-all duration-300 hover:shadow-xl bg-gradient-to-br ${
-            program.isActive 
-                ? "border-primary shadow-lg shadow-primary/10 from-primary/5 to-card" 
-                : "hover:border-primary/50 from-card to-card/50"
-        }`}>
+        <Card className={`overflow-hidden border-2 transition-all duration-300 hover:shadow-xl bg-gradient-to-br ${program.isActive
+            ? "border-primary shadow-lg shadow-primary/10 from-primary/5 to-card"
+            : "hover:border-primary/50 from-card to-card/50"
+            }`}>
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                     <CardTitle className="text-2xl font-bold text-primary truncate leading-tight">
@@ -80,7 +91,7 @@ export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
             </CardContent>
             <CardFooter className="pt-2 gap-2">
                 {!program.isActive ? (
-                    <Button 
+                    <Button
                         className="flex-1 gap-2 shadow-md hover:shadow-primary/20"
                         onClick={handleEnroll}
                         disabled={isEnrolling}

@@ -15,6 +15,7 @@ import { useEffect } from "react";
 interface WorkoutPlayerContainerProps {
     template: Workout;
     programDayId?: string | null;
+    historyData?: Record<string, any>;
 }
 
 export interface SetRecord {
@@ -28,7 +29,7 @@ export interface ExerciseSession {
     sets: SetRecord[];
 }
 
-export default function WorkoutPlayerContainer({ template, programDayId }: WorkoutPlayerContainerProps) {
+export default function WorkoutPlayerContainer({ template, programDayId, historyData }: WorkoutPlayerContainerProps) {
     const router = useRouter();
     const { formattedTime, seconds } = useWorkoutTimer();
 
@@ -44,19 +45,10 @@ export default function WorkoutPlayerContainer({ template, programDayId }: Worko
     const [restTimeRemaining, setRestTimeRemaining] = useState<number | null>(null);
     const [isFinishing, setIsFinishing] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
-    const [lastLog, setLastLog] = useState<any>(null);
 
-    // Fetch history when exercise changes
-    useEffect(() => {
-        const fetchHistory = async () => {
-            const exercise = sessionData[activeExerciseIndex]?.exercise;
-            if (exercise) {
-                const history = await getLastLogForExercise("user_123", exercise.id);
-                setLastLog(history);
-            }
-        };
-        fetchHistory();
-    }, [activeExerciseIndex, sessionData]);
+    // Get history for active exercise from the batch-fetched historyData
+    const activeExercise = sessionData[activeExerciseIndex];
+    const lastLog = activeExercise && historyData ? historyData[activeExercise.exercise.id] : null;
 
     const handleUpdateSet = (exerciseIndex: number, setIndex: number, data: Partial<SetRecord>) => {
         const newData = [...sessionData];
@@ -117,8 +109,6 @@ export default function WorkoutPlayerContainer({ template, programDayId }: Worko
     };
 
     const totalSets = sessionData.reduce((acc, ed) => acc + ed.sets.filter(s => s.isDone).length, 0);
-
-    const activeExercise = sessionData[activeExerciseIndex];
 
     return (
         <div className="flex flex-col min-h-screen">

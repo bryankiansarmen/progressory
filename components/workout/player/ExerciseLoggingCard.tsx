@@ -68,6 +68,7 @@ export default function ExerciseLoggingCard({
                             key={index}
                             setNumber={index + 1}
                             set={set}
+                            lastLogSet={lastLog?.sets?.[index] ? { weight: lastLog.sets[index].weight, reps: lastLog.sets[index].reps } : undefined}
                             onUpdate={(data) => onUpdateSet(index, data)}
                             onToggleDone={() => onToggleDone(index)}
                             onRemove={() => onRemoveSet(index)}

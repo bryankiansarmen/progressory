@@ -5,6 +5,9 @@ import { CheckCircle2, Trophy, ArrowRight, Share2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+import confetti from "canvas-confetti";
+import { useEffect } from "react";
+
 interface SessionCompleteModalProps {
     duration: number;
     exerciseCount: number;
@@ -12,6 +15,29 @@ interface SessionCompleteModalProps {
 }
 
 export default function SessionCompleteModal({ duration, exerciseCount, setCount }: SessionCompleteModalProps) {
+    useEffect(() => {
+        const duration = 5 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+        const interval: any = setInterval(function () {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            // since particles fall down, start a bit higher than random
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-2xl animate-in fade-in duration-500">
             <div className="w-full max-w-lg bg-card border-2 rounded-[40px] shadow-2xl p-8 text-center animate-in zoom-in-95 slide-in-from-bottom-8 duration-500">

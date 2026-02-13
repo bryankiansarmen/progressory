@@ -9,6 +9,7 @@ import { SetRecord } from "./WorkoutPlayerContainer";
 interface SetLoggingRowProps {
     setNumber: number;
     set: SetRecord;
+    lastLogSet?: { weight: number, reps: number };
     onUpdate: (data: Partial<SetRecord>) => void;
     onToggleDone: () => void;
     onRemove: () => void;
@@ -17,10 +18,18 @@ interface SetLoggingRowProps {
 export default function SetLoggingRow({
     setNumber,
     set,
+    lastLogSet,
     onUpdate,
     onToggleDone,
     onRemove
 }: SetLoggingRowProps) {
+    const handleToggle = () => {
+        if (!set.isDone && "vibrate" in navigator) {
+            navigator.vibrate(50); // Short tap vibration
+        }
+        onToggleDone();
+    };
+
     return (
         <div className={cn(
             "grid grid-cols-12 gap-3 items-center p-3 rounded-2xl transition-all duration-300",
@@ -35,7 +44,7 @@ export default function SetLoggingRow({
                 <div className="relative group">
                     <Input
                         type="number"
-                        placeholder="0"
+                        placeholder={lastLogSet ? `${lastLogSet.weight}` : "0"}
                         value={set.weight || ""}
                         onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || 0 })}
                         disabled={set.isDone}
@@ -49,7 +58,7 @@ export default function SetLoggingRow({
                 <div className="relative group">
                     <Input
                         type="number"
-                        placeholder="0"
+                        placeholder={lastLogSet ? `${lastLogSet.reps}` : "0"}
                         value={set.reps || ""}
                         onChange={(e) => onUpdate({ reps: parseInt(e.target.value) || 0 })}
                         disabled={set.isDone}
@@ -71,7 +80,7 @@ export default function SetLoggingRow({
                 </Button>
 
                 <Button
-                    onClick={onToggleDone}
+                    onClick={handleToggle}
                     variant={set.isDone ? "default" : "outline"}
                     className={cn(
                         "h-12 w-12 rounded-xl border-2 transition-all duration-500",

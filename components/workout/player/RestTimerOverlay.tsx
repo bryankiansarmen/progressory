@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, X, Timer } from "lucide-react";
+import { useAudio } from "@/hooks/useAudio";
 
 interface RestTimerOverlayProps {
     seconds: number;
@@ -12,6 +13,7 @@ interface RestTimerOverlayProps {
 
 export default function RestTimerOverlay({ seconds, onClose, onAddSeconds }: RestTimerOverlayProps) {
     const [timeLeft, setTimeLeft] = useState(seconds);
+    const { playBeep } = useAudio();
 
     useEffect(() => {
         setTimeLeft(seconds);
@@ -19,6 +21,12 @@ export default function RestTimerOverlay({ seconds, onClose, onAddSeconds }: Res
 
     useEffect(() => {
         if (timeLeft <= 0) {
+            // Feedback before closing
+            playBeep(600, 200); // Primary beep
+            setTimeout(() => playBeep(800, 150), 150); // Second beep
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200]);
+            }
             onClose();
             return;
         }

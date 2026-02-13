@@ -65,3 +65,19 @@ export const getLastLogForExercise = async (userId: string, exerciseId: string) 
         },
     });
 };
+/**
+ * Fetch the most recent log for each exercise in a list.
+ */
+export const getLatestLogsForExercises = async (userId: string, exerciseIds: string[]) => {
+    const logs = await Promise.all(
+        exerciseIds.map(id => getLastLogForExercise(userId, id))
+    );
+
+    const result: Record<string, any> = {};
+    exerciseIds.forEach((id, index) => {
+        if (logs[index]) {
+            result[id] = logs[index];
+        }
+    });
+    return result;
+};

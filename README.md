@@ -82,13 +82,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 └── types/            # TypeScript type definitions
 ```
 
-## 🏗️ Development Workflow
+## Development Workflow
 
 This project uses the **OpenSpec** methodology for structured feature development. Changes are tracked as "delta specs" in `openspec/changes/`, ensuring that every modification is documented and verified.
 
 - **Specs**: Located in `openspec/specs/`
 - **Archived Changes**: Detailed history of implemented features in `openspec/changes/archive/`
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details (or private use).

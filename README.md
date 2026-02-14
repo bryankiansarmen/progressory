@@ -2,29 +2,29 @@
 
 A modern, full-stack workout tracking application built with **Next.js 15+**, **TypeScript**, and **SQLite**. Designed for efficiency and ease of use, it allows users to plan workouts, log sessions in real-time, and track progress over time.
 
-## 🚀 Features
+## Features
 
-### 📊 Dashboard & Analytics
+### Dashboard & Analytics
 - **Consistency Tracking**: Visualize your workout frequency with activity charts.
 - **Recent PRs**: Automatically track and display personal records for specific exercises.
 - **Quick Actions**: Quickly start a new workout or browse the exercise library.
 
-### 🏋️ Workout Management
+### Workout Management
 - **Workout Builder**: Create and customize workout templates with specific exercises and ordering.
 - **Real-time Player**: Log your active sessions with a dedicated interface including rest timers and set tracking.
 - **Session Summaries**: Review your performance immediately after finishing a workout.
 
-### 📚 Exercise Library
+### Exercise Library
 - **Comprehensive Database**: Browse exercises by muscle group, category, and equipment.
 - **Custom Exercises**: Create your own exercises to fit your specific routine.
 - **Exercise Variations**: Support for hierarchical exercise management (e.g., variations of a base exercise).
 - **Archiving**: Keep your library clean by archiving exercises you no longer use.
 
-### 📜 History & Progress
+### History & Progress
 - **Workout History**: View a chronological list of all past sessions.
 - **Granular Logging**: Detailed breakdown of every set, rep, and weight lifted.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [Next.js 15 (App Router)](https://nextjs.org/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -33,7 +33,7 @@ A modern, full-stack workout tracking application built with **Next.js 15+**, **
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Charts**: [Recharts](https://recharts.org/)
 
-## 🏁 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 20+ 
@@ -65,7 +65,7 @@ A modern, full-stack workout tracking application built with **Next.js 15+**, **
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 ├── app/              # Next.js App Router (pages and layouts)

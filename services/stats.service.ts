@@ -153,3 +153,50 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         strengthScore,
     };
 };
+
+export interface HistoryLog {
+    id: string;
+    date: Date;
+    duration: number | null;
+    workoutName: string;
+    exerciseCount: number;
+    totalVolume: number;
+}
+
+/**
+ * Fetches all workout logs for a user, ordered by date descending.
+ */
+export const getHistory = async (userId: string): Promise<HistoryLog[]> => {
+    const logs = await db.workoutLog.findMany({
+        where: { userId },
+        include: {
+            workout: true,
+            entries: {
+                include: {
+                    sets: {
+                        where: { isDone: true }
+                    }
+                }
+            }
+        },
+        orderBy: { date: 'desc' }
+    });
+
+    return logs.map(log => {
+        let totalVolume = 0;
+        log.entries.forEach(entry => {
+            entry.sets.forEach(set => {
+                totalVolume += set.weight * set.reps;
+            });
+        });
+
+        return {
+            id: log.id,
+            date: log.date,
+            duration: log.duration,
+            workoutName: log.workout?.name ?? "Ad-hoc Workout",
+            exerciseCount: log.entries.length,
+            totalVolume: Math.round(totalVolume),
+        };
+    });
+};

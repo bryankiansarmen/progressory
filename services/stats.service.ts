@@ -66,7 +66,7 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
     const now = new Date();
     const sevenDaysAgo = subDays(startOfDay(now), 7);
 
-    // 1. Fetch all logs for the last 7 days for volume and frequency
+    // Fetch all logs for the last 7 days for volume and frequency
     const recentLogs = await db.workoutLog.findMany({
         where: {
             userId,
@@ -85,7 +85,7 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         },
     });
 
-    // 2. Calculate Weekly Volume
+    // Calculate Weekly Volume
     let totalVolume = 0;
     recentLogs.forEach(log => {
         log.entries.forEach(entry => {
@@ -95,7 +95,7 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         });
     });
 
-    // 3. Activity Days (last 7 days)
+    // Activity Days (last 7 days)
     const activityDays = Array(7).fill(false);
     recentLogs.forEach(log => {
         const dayDiff = Math.floor((now.getTime() - log.date.getTime()) / (1000 * 60 * 60 * 24));
@@ -198,5 +198,26 @@ export const getHistory = async (userId: string): Promise<HistoryLog[]> => {
             exerciseCount: log.entries.length,
             totalVolume: Math.round(totalVolume),
         };
+    });
+};
+
+/**
+ * Fetches the granular details of a single workout log.
+ */
+export const getWorkoutLogDetail = async (logId: string) => {
+    return await db.workoutLog.findUnique({
+        where: { id: logId },
+        include: {
+            workout: true,
+            entries: {
+                include: {
+                    exercise: true,
+                    sets: {
+                        where: { isDone: true },
+                        orderBy: { createdAt: 'asc' }
+                    }
+                }
+            }
+        }
     });
 };

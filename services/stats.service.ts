@@ -221,3 +221,96 @@ export const getWorkoutLogDetail = async (logId: string) => {
         }
     });
 };
+
+export interface VolumeTrend {
+    label: string;
+    volume: number;
+}
+
+/**
+ * Aggregates total volume by week for the specified number of weeks.
+ */
+export const getVolumeTrends = async (userId: string, weeks: number = 12): Promise<VolumeTrend[]> => {
+    const now = new Date();
+    const trends: VolumeTrend[] = [];
+
+    for (let i = weeks - 1; i >= 0; i--) {
+        const start = subDays(startOfDay(now), (i + 1) * 7);
+        const end = subDays(startOfDay(now), i * 7);
+
+        const logs = await db.workoutLog.findMany({
+            where: {
+                userId,
+                date: {
+                    gte: start,
+                    lt: end,
+                },
+            },
+            include: {
+                entries: {
+                    include: {
+                        sets: {
+                            where: { isDone: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        let weeklyVolume = 0;
+        logs.forEach(log => {
+            log.entries.forEach(entry => {
+                entry.sets.forEach(set => {
+                    weeklyVolume += set.weight * set.reps;
+                });
+            });
+        });
+
+        trends.push({
+            label: `W${weeks - i}`,
+            volume: Math.round(weeklyVolume)
+        });
+    }
+
+    return trends;
+};
+
+export interface MuscleDistribution {
+    muscleGroup: string;
+    setCount: number;
+    percentage: number;
+}
+
+/**
+ * Returns a proportional breakdown of sets per muscle group.
+ */
+export const getMuscleDistribution = async (userId: string): Promise<MuscleDistribution[]> => {
+    const entries = await db.workoutLogEntry.findMany({
+        where: {
+            workoutLog: { userId }
+        },
+        include: {
+            exercise: true,
+            sets: {
+                where: { isDone: true }
+            }
+        }
+    });
+
+    const counts: Record<string, number> = {};
+    let totalSets = 0;
+
+    entries.forEach(entry => {
+        const mg = entry.exercise.muscleGroup;
+        counts[mg] = (counts[mg] || 0) + entry.sets.length;
+        totalSets += entry.sets.length;
+    });
+
+    return Object.entries(counts)
+        .map(([muscleGroup, setCount]) => ({
+            muscleGroup,
+            setCount,
+            percentage: totalSets > 0 ? Math.round((setCount / totalSets) * 100) : 0
+        }))
+        .sort((a, b) => b.setCount - a.setCount);
+};

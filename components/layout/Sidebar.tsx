@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Dumbbell, ClipboardList, History, Zap, LayoutList } from "lucide-react";
+import { Home, Dumbbell, ClipboardList, History, Zap, LayoutList, TrendingUp } from "lucide-react";
 import { useActiveRoute } from "@/hooks/useActiveRoute";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,7 @@ export default function Sidebar() {
         { icon: <ClipboardList className="w-5 h-5" />, label: "Workout Routines", href: "/workouts" },
         { icon: <LayoutList className="w-5 h-5" />, label: "Training Programs", href: "/programs" },
         { icon: <History className="w-5 h-5" />, label: "Training History", href: "/history" },
+        { icon: <TrendingUp className="w-5 h-5" />, label: "Analytics Hub", href: "/analytics" },
     ];
 
     return (

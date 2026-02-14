@@ -43,10 +43,10 @@ export default async function DashboardPage() {
             />
             <DashboardStatCard
               title="Strength Score"
-              value={248}
+              value={stats.strengthScore}
               unit="Pts"
               icon={<Flame className="w-12 h-12" />}
-              description="Global progress metric"
+              description="Sum of core lift 1RMs"
               color="amber"
             />
           </div>
@@ -58,9 +58,9 @@ export default async function DashboardPage() {
         {/* Left Column: Progress & PRs */}
         <div className="lg:col-span-8 space-y-12">
           {activeProgram && programProgress && (
-            <ActiveProgramCard 
-              program={activeProgram} 
-              progress={programProgress} 
+            <ActiveProgramCard
+              program={activeProgram}
+              progress={programProgress}
             />
           )}
 

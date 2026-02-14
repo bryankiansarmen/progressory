@@ -48,6 +48,7 @@ model Exercise {
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  isCoreLift  Boolean  @default(false)
 }
 
 model Workout {

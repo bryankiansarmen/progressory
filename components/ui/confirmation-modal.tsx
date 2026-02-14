@@ -1,9 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+import { useEffect, useState } from "react";
 
 export interface ConfirmationModalProps {
   isOpen: boolean;
@@ -28,13 +29,13 @@ export function ConfirmationModal({
   onCancel,
   isLoading = false,
 }: ConfirmationModalProps) {
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -52,12 +53,12 @@ export function ConfirmationModal({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4">
       {/* Backdrop with blur */}
-      <div 
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity animate-in fade-in" 
+      <div
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm transition-opacity animate-in fade-in"
         onClick={onCancel}
         aria-hidden="true"
       />
-      
+
       {/* Modal Content */}
       <div className="relative w-full max-w-lg bg-card border rounded-lg shadow-lg p-6 animate-in zoom-in-95 slide-in-from-bottom-10 sm:slide-in-from-bottom-0 duration-200">
         <div className="flex flex-col space-y-2 text-center sm:text-left">
@@ -72,8 +73,8 @@ export function ConfirmationModal({
         </div>
 
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 gap-2 mt-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onCancel}
             disabled={isLoading}
             className="w-full sm:w-auto"
@@ -85,8 +86,8 @@ export function ConfirmationModal({
             onClick={onConfirm}
             disabled={isLoading}
             className={cn(
-                "w-full sm:w-auto",
-                variant === "warning" && "bg-amber-600 hover:bg-amber-700 text-white"
+              "w-full sm:w-auto",
+              variant === "warning" && "bg-amber-600 hover:bg-amber-700 text-white"
             )}
           >
             {isLoading ? "Processing..." : confirmText}

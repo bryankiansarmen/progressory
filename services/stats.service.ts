@@ -2,6 +2,7 @@
 
 import db from "@/lib/db";
 import { subDays, startOfDay } from "date-fns";
+import { calculateBrzycki1RM } from "@/lib/utils/analytics";
 
 export interface DashboardStats {
     weeklyVolume: number;
@@ -13,7 +14,53 @@ export interface DashboardStats {
         reps: number;
         date: string;
     }[];
+    strengthScore: number;
 }
+
+/**
+ * Calculates the current Strength Score for a user.
+ * The score is the sum of the estimated 1RM for all "Core Lifts".
+ */
+export const getStrengthScore = async (userId: string): Promise<number> => {
+    // Fetch all exercises tagged as core lifts
+    const coreExercises = await db.exercise.findMany({
+        where: { isCoreLift: true }
+    });
+
+    let totalScore = 0;
+
+    // For each core lift, find the best estimated 1RM from history
+    for (const ex of coreExercises) {
+        const entries = await db.workoutLogEntry.findMany({
+            where: {
+                exerciseId: ex.id,
+                workoutLog: { userId }
+            },
+            include: {
+                sets: {
+                    where: { isDone: true }
+                }
+            }
+        });
+
+        let best1RM = 0;
+        entries.forEach(entry => {
+            entry.sets.forEach(set => {
+                // Brzycki is accurate up to 12 reps
+                if (set.reps > 0 && set.reps <= 12) {
+                    const estimated1RM = calculateBrzycki1RM(set.weight, set.reps);
+                    if (estimated1RM > best1RM) {
+                        best1RM = estimated1RM;
+                    }
+                }
+            });
+        });
+
+        totalScore += best1RM;
+    }
+
+    return Math.round(totalScore);
+};
 
 export const getDashboardStats = async (userId: string): Promise<DashboardStats> => {
     const now = new Date();
@@ -30,7 +77,9 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         include: {
             entries: {
                 include: {
-                    sets: true,
+                    sets: {
+                        where: { isDone: true }
+                    },
                 },
             },
         },
@@ -55,39 +104,52 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         }
     });
 
-    // 4. Fetch Recent PRs (Simulated - Top weight per exercise for this user)
-    // Corrected relation name from 'log' to 'workoutLog'
+    // Fetch Recent PRs (Real 1RM-based PRs)
     const allEntries = await db.workoutLogEntry.findMany({
         where: { workoutLog: { userId } },
         include: {
             exercise: true,
             sets: {
-                orderBy: { weight: 'desc' },
-                take: 1
+                where: { isDone: true },
             },
             workoutLog: true
         },
         orderBy: { createdAt: 'desc' },
-        take: 30
+        take: 50 // Pull more to find unique PRs
     });
 
-    // Filter to get unique exercises and their top weights
+    // Filter to get unique exercises and their top weights (estimated 1RM)
     const prMap = new Map();
     (allEntries as any[]).forEach(entry => {
         if (!prMap.has(entry.exerciseId) && entry.sets.length > 0) {
+            let bestSet1RM = 0;
+            let bestSet = entry.sets[0];
+
+            entry.sets.forEach((s: any) => {
+                const oneRM = calculateBrzycki1RM(s.weight, s.reps);
+                if (oneRM > bestSet1RM) {
+                    bestSet1RM = oneRM;
+                    bestSet = s;
+                }
+            });
+
             prMap.set(entry.exerciseId, {
                 exerciseName: entry.exercise.name,
-                weight: entry.sets[0].weight,
-                reps: entry.sets[0].reps,
+                weight: bestSet.weight,
+                reps: bestSet.reps,
                 date: entry.workoutLog.date.toLocaleDateString(),
             });
         }
     });
 
+    // Get Strength Score
+    const strengthScore = await getStrengthScore(userId);
+
     return {
-        weeklyVolume: totalVolume,
+        weeklyVolume: Math.round(totalVolume),
         weeklySessions: recentLogs.length,
         activityDays,
         recentPRs: Array.from(prMap.values()).slice(0, 3),
+        strengthScore,
     };
 };

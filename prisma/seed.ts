@@ -16,6 +16,27 @@ async function main() {
     });
 
     console.log(`Default user created/verified: ${defaultUser.id}`);
+
+    const coreExercises = [
+        { name: "Bench Press", category: "Strength", muscleGroup: "Chest", equipment: "Barbell" },
+        { name: "Back Squat", category: "Strength", muscleGroup: "Legs", equipment: "Barbell" },
+        { name: "Deadlift", category: "Strength", muscleGroup: "Legs", equipment: "Barbell" },
+        { name: "Overhead Press", category: "Strength", muscleGroup: "Shoulders", equipment: "Barbell" },
+    ];
+
+    for (const ex of coreExercises) {
+        await prisma.exercise.upsert({
+            where: { id: ex.name.toLowerCase().replace(/\s+/g, '-') },
+            update: { isCoreLift: true },
+            create: {
+                id: ex.name.toLowerCase().replace(/\s+/g, '-'),
+                ...ex,
+                isCoreLift: true,
+            },
+        });
+    }
+
+    console.log("Core exercises seeded.");
     console.log("Seeding complete.");
 }
 

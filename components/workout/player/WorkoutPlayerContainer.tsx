@@ -83,6 +83,15 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
         }
     };
 
+    const handleSwapExercise = (index: number, newExercise: Exercise) => {
+        const newData = [...sessionData];
+        newData[index] = {
+            ...newData[index],
+            exercise: newExercise,
+        };
+        setSessionData(newData);
+    };
+
     const handleFinish = async () => {
         setIsFinishing(true);
         try {
@@ -129,6 +138,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                         onAddSet={() => handleAddSet(activeExerciseIndex)}
                         onRemoveSet={(idx: number) => handleRemoveSet(activeExerciseIndex, idx)}
                         onToggleDone={(idx: number) => handleToggleSetDone(activeExerciseIndex, idx)}
+                        onSwap={(newEx: Exercise) => handleSwapExercise(activeExerciseIndex, newEx)}
                     />
                 ) : (
                     <div className="text-center py-20 bg-card rounded-3xl border-2">

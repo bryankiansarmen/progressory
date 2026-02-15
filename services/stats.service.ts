@@ -314,3 +314,144 @@ export const getMuscleDistribution = async (userId: string): Promise<MuscleDistr
         }))
         .sort((a, b) => b.setCount - a.setCount);
 };
+
+export interface FamilyPerformance {
+    exerciseName: string;
+    bestWeight: number;
+    bestReps: number;
+    best1RM: number;
+    date: string;
+}
+
+/**
+ * Aggregates total volume by week for a specific exercise family.
+ */
+export const getFamilyVolumeTrend = async (userId: string, familyId: string, weeks: number = 12): Promise<VolumeTrend[]> => {
+    const now = new Date();
+    const trends: VolumeTrend[] = [];
+
+    // Get all exercise IDs in this family
+    const family = await db.exercise.findMany({
+        where: {
+            OR: [
+                { id: familyId },
+                { parentId: familyId }
+            ]
+        },
+        select: { id: true }
+    });
+    const familyIds = family.map(ex => ex.id);
+
+    if (familyIds.length === 0) return [];
+
+    // Aggregate volume week by week
+    for (let i = weeks - 1; i >= 0; i--) {
+        const start = subDays(startOfDay(now), (i + 1) * 7);
+        const end = subDays(startOfDay(now), i * 7);
+
+        const logs = await db.workoutLog.findMany({
+            where: {
+                userId,
+                date: { gte: start, lt: end },
+                entries: {
+                    some: { exerciseId: { in: familyIds } }
+                }
+            },
+            include: {
+                entries: {
+                    where: { exerciseId: { in: familyIds } },
+                    include: {
+                        sets: { where: { isDone: true } }
+                    }
+                }
+            }
+        });
+
+        let weeklyVolume = 0;
+        logs.forEach(log => {
+            log.entries.forEach(entry => {
+                entry.sets.forEach(set => {
+                    weeklyVolume += set.weight * set.reps;
+                });
+            });
+        });
+
+        trends.push({
+            label: `W${weeks - i}`,
+            volume: Math.round(weeklyVolume)
+        });
+    }
+
+    return trends;
+};
+
+/**
+ * Finds the top performance across an entire movement family.
+ */
+export const getFamilyBestPerformance = async (userId: string, familyId: string): Promise<FamilyPerformance | null> => {
+    const family = await db.exercise.findMany({
+        where: {
+            OR: [
+                { id: familyId },
+                { parentId: familyId }
+            ]
+        },
+        select: { id: true }
+    });
+    const familyIds = family.map(ex => ex.id);
+
+    if (familyIds.length === 0) return null;
+
+    const entries = await db.workoutLogEntry.findMany({
+        where: {
+            workoutLog: { userId },
+            exerciseId: { in: familyIds }
+        },
+        include: {
+            exercise: true,
+            sets: {
+                where: { isDone: true }
+            },
+            workoutLog: true
+        }
+    });
+
+    let topPerf: FamilyPerformance | null = null;
+    let max1RM = 0;
+
+    entries.forEach(entry => {
+        entry.sets.forEach(set => {
+            const oneRM = calculateBrzycki1RM(set.weight, set.reps);
+            if (oneRM > max1RM) {
+                max1RM = oneRM;
+                topPerf = {
+                    exerciseName: entry.exercise.name,
+                    bestWeight: set.weight,
+                    bestReps: set.reps,
+                    best1RM: Math.round(oneRM),
+                    date: entry.workoutLog.date.toLocaleDateString()
+                };
+            }
+        });
+    });
+
+    return topPerf;
+};
+
+/**
+ * Fetches volume trends for all core movement families.
+ */
+export const getCoreFamiliesTrends = async (userId: string): Promise<{ name: string; data: VolumeTrend[] }[]> => {
+    const coreLifts = await db.exercise.findMany({
+        where: { isCoreLift: true, parentId: null }
+    });
+
+    const results = [];
+    for (const lift of coreLifts) {
+        const data = await getFamilyVolumeTrend(userId, lift.id, 8);
+        if (data.some(d => d.volume > 0)) {
+            results.push({ name: lift.name, data });
+        }
+    }
+    return results;
+};

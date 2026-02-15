@@ -1,7 +1,8 @@
-import { getVolumeTrends, getMuscleDistribution, getDashboardStats } from "@/services/stats.service";
+import { getVolumeTrends, getMuscleDistribution, getDashboardStats, getCoreFamiliesTrends } from "@/services/stats.service";
 import AreaChart from "@/components/charts/AreaChart";
 import DistributionBar from "@/components/charts/DistributionBar";
 import PRHistoryTable from "@/components/charts/PRHistoryTable";
+import FamilyAnalyticsSection from "@/components/charts/FamilyAnalyticsSection";
 import { TrendingUp, PieChart, Info, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ export default async function AnalyticsPage() {
     const volumeTrends = await getVolumeTrends(userId, 8); // 8 week lookback for cleaner view
     const muscleDistribution = await getMuscleDistribution(userId);
     const { recentPRs } = await getDashboardStats(userId);
+    const familyTrends = await getCoreFamiliesTrends(userId);
 
     return (
         <main className="min-h-screen bg-background pb-20">
@@ -62,6 +64,8 @@ export default async function AnalyticsPage() {
                         </section>
 
                         <PRHistoryTable records={recentPRs} />
+
+                        <FamilyAnalyticsSection familyTrends={familyTrends} />
                     </div>
 
                     {/* Right Column: Muscle Proportions */}

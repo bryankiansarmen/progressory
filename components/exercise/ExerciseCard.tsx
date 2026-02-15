@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dumbbell, Target, Layers, ChevronDown, ChevronUp, Box, MoreVertical, Edit2, Trash2, AlertCircle } from "lucide-react";
 import CreateExerciseDialog from "./CreateExerciseDialog";
 import { useConfirm } from "@/hooks/useInteraction";
+import FamilyTrendChart from "./FamilyTrendChart";
 
 interface ExerciseCardProps {
     exercise: Exercise;
@@ -171,6 +172,12 @@ export default function ExerciseCard({ exercise, onExerciseUpdated, onExerciseAr
                                         )}
                                     </div>
                                 ))}
+                            </div>
+                        )}
+
+                        {isExpanded && (
+                            <div className="mt-4 pt-4 border-t border-primary/5">
+                                <FamilyTrendChart familyId={exercise.id} />
                             </div>
                         )}
                     </div>

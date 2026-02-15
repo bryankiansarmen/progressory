@@ -112,7 +112,7 @@ export const updateExercise = async (id: string, userId: string, data: {
     parentId?: string | null;
 }): Promise<Exercise> => {
     return await db.exercise.update({
-        where: { 
+        where: {
             id,
             userId // Ownership check
         },
@@ -125,7 +125,7 @@ export const updateExercise = async (id: string, userId: string, data: {
  */
 export const archiveExercise = async (id: string, userId: string): Promise<Exercise> => {
     return await db.exercise.update({
-        where: { 
+        where: {
             id,
             userId // Ownership check
         },
@@ -133,4 +133,30 @@ export const archiveExercise = async (id: string, userId: string): Promise<Exerc
             isArchived: true
         }
     });
+};
+
+/**
+ * Fetch the entire movement family for an exercise.
+ * Returns the parent exercise and all its variations.
+ */
+export const getExerciseFamily = async (exerciseId: string): Promise<Exercise[]> => {
+    const exercise = await db.exercise.findUnique({
+        where: { id: exerciseId },
+        select: { id: true, parentId: true }
+    });
+
+    if (!exercise) return [];
+
+    const rootId = exercise.parentId || exercise.id;
+
+    return await db.exercise.findMany({
+        where: {
+            OR: [
+                { id: rootId },
+                { parentId: rootId }
+            ],
+            isArchived: false
+        },
+        orderBy: { name: "asc" }
+    }) as any;
 };

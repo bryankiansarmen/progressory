@@ -18,10 +18,10 @@ async function main() {
     console.log(`Default user created/verified: ${defaultUser.id}`);
 
     const coreExercises = [
-        { name: "Bench Press", category: "Strength", muscleGroup: "Chest", equipment: "Barbell" },
-        { name: "Back Squat", category: "Strength", muscleGroup: "Legs", equipment: "Barbell" },
-        { name: "Deadlift", category: "Strength", muscleGroup: "Legs", equipment: "Barbell" },
-        { name: "Overhead Press", category: "Strength", muscleGroup: "Shoulders", equipment: "Barbell" },
+        { name: "Bench Press", category: "Strength", muscleGroup: "Chest", equipment: "Barbell", restTime: 180 },
+        { name: "Back Squat", category: "Strength", muscleGroup: "Legs", equipment: "Barbell", restTime: 180 },
+        { name: "Deadlift", category: "Strength", muscleGroup: "Legs", equipment: "Barbell", restTime: 240 },
+        { name: "Overhead Press", category: "Strength", muscleGroup: "Shoulders", equipment: "Barbell", restTime: 120 },
     ];
 
     for (const ex of coreExercises) {

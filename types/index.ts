@@ -10,6 +10,7 @@ export interface Exercise {
     variations?: Exercise[];
     createdAt?: Date;
     updatedAt?: Date;
+    restTime?: number;
 }
 
 export interface Workout {

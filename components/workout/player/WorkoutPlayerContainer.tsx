@@ -6,7 +6,7 @@ import { useWorkoutTimer } from "@/hooks/useWorkoutTimer";
 import PlayerHeader from "./PlayerHeader";
 import ExerciseLoggingCard from "./ExerciseLoggingCard";
 import SessionSummary from "./SessionSummary";
-import RestTimerOverlay from "./RestTimerOverlay";
+import RestTimer from "./RestTimer";
 import SessionCompleteModal from "./SessionCompleteModal";
 import { logWorkout, getLastLogForExercise } from "@/services/logging.service";
 import { useRouter } from "next/navigation";
@@ -77,9 +77,9 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
         const currentDone = sessionData[exerciseIndex].sets[setIndex].isDone;
         handleUpdateSet(exerciseIndex, setIndex, { isDone: !currentDone });
 
-        // If marking as done, trigger a rest timer (default 90s)
+        // If marking as done, trigger a rest timer
         if (!currentDone) {
-            setRestTimeRemaining(90);
+            setRestTimeRemaining(activeExercise.exercise.restTime || 90);
         }
     };
 
@@ -154,10 +154,10 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
             </div>
 
             {restTimeRemaining !== null && (
-                <RestTimerOverlay
-                    seconds={restTimeRemaining}
-                    onClose={() => setRestTimeRemaining(null)}
-                    onAddSeconds={(s: number) => setRestTimeRemaining(prev => (prev || 0) + s)}
+                <RestTimer
+                    duration={restTimeRemaining}
+                    onComplete={() => setRestTimeRemaining(null)}
+                    onSkip={() => setRestTimeRemaining(null)}
                 />
             )}
 

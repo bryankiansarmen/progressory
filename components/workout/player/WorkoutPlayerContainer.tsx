@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Workout, Exercise } from "@/types";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTimer";
 import PlayerHeader from "./PlayerHeader";
@@ -109,6 +109,9 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
         }));
     };
 
+    const handleCloseRestTimer = useCallback(() => setRestTimeRemaining(null), []);
+    const handleSkipRestTimer = useCallback(() => setRestTimeRemaining(null), []);
+
     const handleFinish = async () => {
         setIsFinishing(true);
         try {
@@ -173,8 +176,8 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
             {restTimeRemaining !== null && (
                 <RestTimer
                     duration={restTimeRemaining}
-                    onComplete={() => setRestTimeRemaining(null)}
-                    onSkip={() => setRestTimeRemaining(null)}
+                    onComplete={handleCloseRestTimer}
+                    onSkip={handleSkipRestTimer}
                 />
             )}
 

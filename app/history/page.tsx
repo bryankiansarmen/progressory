@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { getHistory } from "@/services/stats.service";
 import { HistoryFeed } from "@/components/history/HistoryFeed";
 
-const USER_ID = "user-1"; // Hardcoded for MVP as per project patterns
+const USER_ID = "user_123"; // Mock ID matching seeded user and other components
 
 export default async function HistoryPage() {
     const logs = await getHistory(USER_ID);

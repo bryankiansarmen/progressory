@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export function useWorkoutTimer() {
-    const [seconds, setSeconds] = useState(0);
+export function useWorkoutTimer(initialSeconds: number = 0) {
+    const [seconds, setSeconds] = useState(initialSeconds);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Sync seconds when initialSeconds changes (e.g. after hydration)
+    useEffect(() => {
+        setSeconds(initialSeconds);
+    }, [initialSeconds]);
 
     useEffect(() => {
         intervalRef.current = setInterval(() => {

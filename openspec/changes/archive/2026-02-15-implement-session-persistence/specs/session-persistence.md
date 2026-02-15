@@ -1,30 +1,4 @@
-# live-session-tracking Specification
-
-## Purpose
-TBD - created by archiving change implement-workout-player. Update Purpose after archive.
-## Requirements
-### Requirement: Session Initialization
-The system SHALL support starting a workout session from a previously created `Workout` template.
-
-#### Scenario: Start from Template
-- **WHEN** the user selects "Start" on a workout template
-- **THEN** the system SHALL navigate to `/workouts/active`
-- **AND** load all exercises associated with that template.
-
-### Requirement: Workout Timer
-The system SHALL maintain a live timer calculating the elapsed time from the moment the session started.
-
-#### Scenario: Timer visibility
-- **WHEN** a session is active
-- **THEN** the header SHALL display an incrementing timer in `MM:SS` format.
-
-### Requirement: Session Completion
-The system SHALL allow users to finish and persist their workout data.
-
-#### Scenario: Finish Workout
-- **WHEN** the user clicks "Finish"
-- **THEN** the system SHALL calculate total duration
-- **AND** save the workout session using the `logging.service.ts`.
+## ADDED Requirements
 
 ### Requirement: Automatic State Persistence
 The system must automatically save the current workout state to persistent storage on every state change to prevent data loss.
@@ -49,4 +23,3 @@ The system must clear the persisted session data only when the workout is explic
 - **GIVEN** the user is viewing the session summary after clicking "Finish"
 - **WHEN** the `logWorkout` service call succeeds
 - **THEN** the session data must be removed from `localStorage` to prevent stale recovery on the next visit.
-

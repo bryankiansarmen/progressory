@@ -29,22 +29,81 @@ export interface ExerciseSession {
     sets: SetRecord[];
 }
 
+const STORAGE_KEY = "progressory_active_session";
+
+interface PersistedSession {
+    templateId: string;
+    sessionData: ExerciseSession[];
+    seconds: number;
+    activeExerciseIndex: number;
+    restTimeRemaining: number | null;
+}
+
 export default function WorkoutPlayerContainer({ template, programDayId, historyData }: WorkoutPlayerContainerProps) {
     const router = useRouter();
-    const { formattedTime, seconds } = useWorkoutTimer();
 
-    // Initialize session state with exercises from template
-    const [sessionData, setSessionData] = useState<ExerciseSession[]>(
-        template.exercises?.map(we => ({
-            exercise: we.exercise!,
-            sets: [{ reps: 0, weight: 0, isDone: false }] // Start with one empty set
-        })) || []
-    );
+    // Try to hydrate session on component definition (before hooks)
+    const [isHydrated, setIsHydrated] = useState(false);
+    const [initialState, setInitialState] = useState<PersistedSession | null>(null);
 
+    // Initial hydration effect
+    useEffect(() => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed: PersistedSession = JSON.parse(saved);
+                if (parsed.templateId === template.id) {
+                    setInitialState(parsed);
+                }
+            } catch (e) {
+                console.error("Failed to parse persisted session:", e);
+            }
+        }
+        setIsHydrated(true);
+    }, [template.id]);
+
+    // Initialize session state with exercises from template OR hydrated state
+    const [sessionData, setSessionData] = useState<ExerciseSession[]>([]);
     const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
     const [restTimeRemaining, setRestTimeRemaining] = useState<number | null>(null);
     const [isFinishing, setIsFinishing] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
+
+    // Timer hook needs specific handling for hydration
+    const { formattedTime, seconds } = useWorkoutTimer(initialState?.seconds || 0);
+
+    // Sync state once hydrated
+    useEffect(() => {
+        if (isHydrated) {
+            if (initialState) {
+                setSessionData(initialState.sessionData);
+                setActiveExerciseIndex(initialState.activeExerciseIndex);
+                setRestTimeRemaining(initialState.restTimeRemaining);
+            } else {
+                // Default initialization
+                setSessionData(
+                    template.exercises?.map(we => ({
+                        exercise: we.exercise!,
+                        sets: [{ reps: 0, weight: 0, isDone: false }]
+                    })) || []
+                );
+            }
+        }
+    }, [isHydrated, initialState, template.exercises]);
+
+    // Persistence: Save state on every change
+    useEffect(() => {
+        if (!isHydrated) return; // Don't overwrite with empty state while hydrating
+
+        const state: PersistedSession = {
+            templateId: template.id,
+            sessionData,
+            seconds,
+            activeExerciseIndex,
+            restTimeRemaining
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }, [isHydrated, template.id, sessionData, seconds, activeExerciseIndex, restTimeRemaining]);
 
     // Get history for active exercise from the batch-fetched historyData
     const activeExercise = sessionData[activeExerciseIndex];
@@ -129,6 +188,10 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                     }))
                 })).filter(e => e.sets.length > 0)
             });
+
+            // Clear persistence on success
+            localStorage.removeItem(STORAGE_KEY);
+
             setShowSummary(true);
         } catch (error) {
             console.error("Failed to log workout:", error);

@@ -51,45 +51,62 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
     const lastLog = activeExercise && historyData ? historyData[activeExercise.exercise.id] : null;
 
     const handleUpdateSet = (exerciseIndex: number, setIndex: number, data: Partial<SetRecord>) => {
-        const newData = [...sessionData];
-        newData[exerciseIndex].sets[setIndex] = { ...newData[exerciseIndex].sets[setIndex], ...data };
-        setSessionData(newData);
+        setSessionData(prev => prev.map((ed, exIdx) => {
+            if (exIdx !== exerciseIndex) return ed;
+            return {
+                ...ed,
+                sets: ed.sets.map((s, sIdx) => {
+                    if (sIdx !== setIndex) return s;
+                    return { ...s, ...data };
+                })
+            };
+        }));
     };
 
     const handleAddSet = (exerciseIndex: number) => {
-        const newData = [...sessionData];
-        const lastSet = newData[exerciseIndex].sets[newData[exerciseIndex].sets.length - 1];
-        newData[exerciseIndex].sets.push({
-            reps: lastSet?.reps || 0,
-            weight: lastSet?.weight || 0,
-            isDone: false
-        });
-        setSessionData(newData);
+        setSessionData(prev => prev.map((ed, exIdx) => {
+            if (exIdx !== exerciseIndex) return ed;
+            const lastSet = ed.sets[ed.sets.length - 1];
+            return {
+                ...ed,
+                sets: [...ed.sets, {
+                    reps: lastSet?.reps || 0,
+                    weight: lastSet?.weight || 0,
+                    isDone: false
+                }]
+            };
+        }));
     };
 
     const handleRemoveSet = (exerciseIndex: number, setIndex: number) => {
-        const newData = [...sessionData];
-        newData[exerciseIndex].sets = newData[exerciseIndex].sets.filter((_, i) => i !== setIndex);
-        setSessionData(newData);
+        setSessionData(prev => prev.map((ed, exIdx) => {
+            if (exIdx !== exerciseIndex) return ed;
+            return {
+                ...ed,
+                sets: ed.sets.filter((_, i) => i !== setIndex)
+            };
+        }));
     };
 
     const handleToggleSetDone = (exerciseIndex: number, setIndex: number) => {
-        const currentDone = sessionData[exerciseIndex].sets[setIndex].isDone;
+        const set = sessionData[exerciseIndex].sets[setIndex];
+        const currentDone = set.isDone;
+
         handleUpdateSet(exerciseIndex, setIndex, { isDone: !currentDone });
 
-        // If marking as done, trigger a rest timer
         if (!currentDone) {
-            setRestTimeRemaining(activeExercise.exercise.restTime || 90);
+            setRestTimeRemaining(sessionData[exerciseIndex].exercise.restTime || 90);
         }
     };
 
     const handleSwapExercise = (index: number, newExercise: Exercise) => {
-        const newData = [...sessionData];
-        newData[index] = {
-            ...newData[index],
-            exercise: newExercise,
-        };
-        setSessionData(newData);
+        setSessionData(prev => prev.map((ed, exIdx) => {
+            if (exIdx !== index) return ed;
+            return {
+                ...ed,
+                exercise: newExercise
+            };
+        }));
     };
 
     const handleFinish = async () => {

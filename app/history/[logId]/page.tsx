@@ -10,7 +10,8 @@ interface PageProps {
 }
 
 export default async function SessionDetailPage({ params }: PageProps) {
-    const log = await getWorkoutLogDetail(params.logId);
+    const { logId } = await params;
+    const log = await getWorkoutLogDetail(logId);
 
     if (!log) {
         notFound();

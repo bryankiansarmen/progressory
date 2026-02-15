@@ -34,6 +34,7 @@ export const logWorkout = async (data: LogWorkoutData) => {
                         create: entry.sets.map((set) => ({
                             reps: set.reps,
                             weight: set.weight,
+                            isDone: true,
                         })),
                     },
                 })),

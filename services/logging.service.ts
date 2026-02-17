@@ -82,3 +82,53 @@ export const getLatestLogsForExercises = async (userId: string, exerciseIds: str
     });
     return result;
 };
+
+/**
+ * Sync (upsert) the current draft session progress to the database.
+ */
+export const syncDraftSession = async (data: {
+    userId: string;
+    templateId: string;
+    data: string; // Serialized JSON
+    seconds: number;
+    activeExerciseIndex: number;
+}) => {
+    return await db.draftSession.upsert({
+        where: { userId: data.userId },
+        update: {
+            templateId: data.templateId,
+            data: data.data,
+            seconds: data.seconds,
+            activeExerciseIndex: data.activeExerciseIndex,
+        },
+        create: {
+            userId: data.userId,
+            templateId: data.templateId,
+            data: data.data,
+            seconds: data.seconds,
+            activeExerciseIndex: data.activeExerciseIndex,
+        },
+    });
+};
+
+/**
+ * Retrieve the existing draft session for a user.
+ */
+export const getDraftSession = async (userId: string) => {
+    return await db.draftSession.findUnique({
+        where: { userId },
+    });
+};
+
+/**
+ * Discard/Delete the draft session for a user.
+ */
+export const discardDraftSession = async (userId: string) => {
+    try {
+        await db.draftSession.delete({
+            where: { userId },
+        });
+    } catch (e) {
+        // Ignore if record doesn't exist
+    }
+};

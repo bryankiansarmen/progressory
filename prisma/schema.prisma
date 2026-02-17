@@ -21,6 +21,7 @@ model User {
   workoutLogs  WorkoutLog[]
   customExercises Exercise[]
   programs     Program[]
+  draftSession DraftSession?
 }
 
 model Exercise {
@@ -160,5 +161,16 @@ model ProgramDay {
   logs      WorkoutLog[]
   
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DraftSession {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  templateId String
+  data      String   // JSON serialized ExerciseSession[]
+  seconds   Int      // Current timer value
+  activeExerciseIndex Int
   updatedAt DateTime @updatedAt
 }

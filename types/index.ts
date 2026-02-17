@@ -87,3 +87,13 @@ export interface ProgramDay {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface DraftSession {
+    id: string;
+    userId: string;
+    templateId: string;
+    data: string;
+    seconds: number;
+    activeExerciseIndex: number;
+    updatedAt: Date;
+}

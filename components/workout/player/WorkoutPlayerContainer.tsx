@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Workout, Exercise } from "@/types";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTimer";
 import PlayerHeader from "./PlayerHeader";
@@ -8,7 +8,8 @@ import ExerciseLoggingCard from "./ExerciseLoggingCard";
 import SessionSummary from "./SessionSummary";
 import RestTimer from "./RestTimer";
 import SessionCompleteModal from "./SessionCompleteModal";
-import { logWorkout, getLastLogForExercise } from "@/services/logging.service";
+import ConflictResolutionModal from "./ConflictResolutionModal";
+import { logWorkout, getLastLogForExercise, syncDraftSession, getDraftSession, discardDraftSession } from "@/services/logging.service";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -37,50 +38,124 @@ interface PersistedSession {
     seconds: number;
     activeExerciseIndex: number;
     restTimeRemaining: number | null;
+    updatedAt?: number;
 }
 
 export default function WorkoutPlayerContainer({ template, programDayId, historyData }: WorkoutPlayerContainerProps) {
     const router = useRouter();
+    const userId = "user_123"; // Mock
 
-    // Try to hydrate session on component definition (before hooks)
+    // Hydration & Conflict State
     const [isHydrated, setIsHydrated] = useState(false);
     const [initialState, setInitialState] = useState<PersistedSession | null>(null);
+    const [cloudDraft, setCloudDraft] = useState<PersistedSession | null>(null);
+    const [showConflictModal, setShowConflictModal] = useState(false);
+    const [syncStatus, setSyncStatus] = useState<"syncing" | "saved" | "error">("saved");
 
-    // Initial hydration effect
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const parsed: PersistedSession = JSON.parse(saved);
-                if (parsed.templateId === template.id) {
-                    setInitialState(parsed);
-                }
-            } catch (e) {
-                console.error("Failed to parse persisted session:", e);
-            }
-        }
-        setIsHydrated(true);
-    }, [template.id]);
-
-    // Initialize session state with exercises from template OR hydrated state
+    // Session state
     const [sessionData, setSessionData] = useState<ExerciseSession[]>([]);
     const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
     const [restTimeRemaining, setRestTimeRemaining] = useState<number | null>(null);
     const [isFinishing, setIsFinishing] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
 
-    // Timer hook needs specific handling for hydration
+    // Timer hook
     const { formattedTime, seconds } = useWorkoutTimer(initialState?.seconds || 0);
 
-    // Sync state once hydrated
+    const syncDataRef = useRef({ sessionData, seconds, activeExerciseIndex });
+
+    // Keep refs up to date
     useEffect(() => {
-        if (isHydrated) {
+        syncDataRef.current = { sessionData, seconds, activeExerciseIndex };
+    }, [sessionData, seconds, activeExerciseIndex]);
+
+    const performSync = useCallback(async (isManual = false) => {
+        if (!isHydrated || showConflictModal || isFinishing) return;
+
+        setSyncStatus("syncing");
+        const startTime = Date.now();
+
+        try {
+            const { sessionData, seconds, activeExerciseIndex } = syncDataRef.current;
+            await syncDraftSession({
+                userId,
+                templateId: template.id,
+                data: JSON.stringify(sessionData),
+                seconds,
+                activeExerciseIndex,
+            });
+
+            // Ensure indicator is visible for at least 800ms
+            const elapsed = Date.now() - startTime;
+            const delay = Math.max(0, 800 - elapsed);
+            setTimeout(() => setSyncStatus("saved"), delay);
+        } catch (e) {
+            setSyncStatus("error");
+        }
+    }, [isHydrated, showConflictModal, isFinishing, userId, template.id]);
+
+    // Initial hydration from LocalStorage & Server
+    useEffect(() => {
+        const loadSessions = async () => {
+            // Reset conflict states when template changes
+            setShowConflictModal(false);
+            setCloudDraft(null);
+            setInitialState(null);
+
+            // Check LocalStorage
+            const saved = localStorage.getItem(STORAGE_KEY);
+            let local: PersistedSession | null = null;
+            if (saved) {
+                try {
+                    local = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Failed to parse local session:", e);
+                }
+            }
+
+            // Check Server
+            const draft = await getDraftSession(userId);
+            let server: PersistedSession | null = null;
+            if (draft) {
+                try {
+                    server = {
+                        templateId: draft.templateId,
+                        sessionData: JSON.parse(draft.data),
+                        seconds: draft.seconds,
+                        activeExerciseIndex: draft.activeExerciseIndex,
+                        restTimeRemaining: null,
+                        updatedAt: new Date(draft.updatedAt).getTime(),
+                    };
+                } catch (e) {
+                    console.error("Failed to parse server session:", e);
+                }
+            }
+
+            // Decide which to use or if we show conflict
+            const bestSession = server && (!local || (server.updatedAt || 0) > (local.updatedAt || 0)) ? server : local;
+
+            if (bestSession) {
+                if (bestSession.templateId !== template.id) {
+                    setCloudDraft(bestSession);
+                    setShowConflictModal(true);
+                } else {
+                    setInitialState(bestSession);
+                }
+            }
+            setIsHydrated(true);
+        };
+
+        loadSessions();
+    }, [template.id, userId]);
+
+    // State synchronization on hydration
+    useEffect(() => {
+        if (isHydrated && !showConflictModal) {
             if (initialState) {
                 setSessionData(initialState.sessionData);
                 setActiveExerciseIndex(initialState.activeExerciseIndex);
                 setRestTimeRemaining(initialState.restTimeRemaining);
             } else {
-                // Default initialization
                 setSessionData(
                     template.exercises?.map(we => ({
                         exercise: we.exercise!,
@@ -89,23 +164,39 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                 );
             }
         }
-    }, [isHydrated, initialState, template.exercises]);
+    }, [isHydrated, initialState, template.exercises, showConflictModal]);
 
-    // Persistence: Save state on every change
+    // Sync every 30 seconds
     useEffect(() => {
-        if (!isHydrated) return; // Don't overwrite with empty state while hydrating
+        if (!isHydrated || showConflictModal || isFinishing) return;
+        const interval = setInterval(() => performSync(), 30000);
+        return () => clearInterval(interval);
+    }, [isHydrated, showConflictModal, isFinishing, performSync]);
+
+    // Sync immediately on major data change (Set toggled/Exercise swapped)
+    useEffect(() => {
+        if (!isHydrated || showConflictModal || isFinishing) return;
+        // Skip first run
+        if (sessionData.length > 0) {
+            performSync();
+        }
+    }, [sessionData, activeExerciseIndex]);
+
+    // Persistence to LocalStorage on change
+    useEffect(() => {
+        if (!isHydrated || showConflictModal) return;
 
         const state: PersistedSession = {
             templateId: template.id,
             sessionData,
             seconds,
             activeExerciseIndex,
-            restTimeRemaining
+            restTimeRemaining,
+            updatedAt: Date.now()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, [isHydrated, template.id, sessionData, seconds, activeExerciseIndex, restTimeRemaining]);
+    }, [isHydrated, template.id, sessionData, seconds, activeExerciseIndex, restTimeRemaining, showConflictModal]);
 
-    // Get history for active exercise from the batch-fetched historyData
     const activeExercise = sessionData[activeExerciseIndex];
     const lastLog = activeExercise && historyData ? historyData[activeExercise.exercise.id] : null;
 
@@ -171,12 +262,26 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
     const handleCloseRestTimer = useCallback(() => setRestTimeRemaining(null), []);
     const handleSkipRestTimer = useCallback(() => setRestTimeRemaining(null), []);
 
+    const handleResume = () => {
+        if (cloudDraft) {
+            router.push(`/workouts/active?workoutId=${cloudDraft.templateId}`);
+        }
+    };
+
+    const handleDiscard = async () => {
+        setInitialState(null);
+        setCloudDraft(null);
+        setShowConflictModal(false);
+        localStorage.removeItem(STORAGE_KEY);
+        await discardDraftSession(userId);
+    };
+
     const handleFinish = async () => {
         setIsFinishing(true);
         try {
             await logWorkout({
                 workoutId: template.id,
-                userId: "user_123", // Mock
+                userId,
                 duration: Math.floor(seconds / 60),
                 programDayId: programDayId || undefined,
                 entries: sessionData.map(ed => ({
@@ -189,8 +294,8 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                 })).filter(e => e.sets.length > 0)
             });
 
-            // Clear persistence on success
             localStorage.removeItem(STORAGE_KEY);
+            await discardDraftSession(userId);
 
             setShowSummary(true);
         } catch (error) {
@@ -209,6 +314,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                 timer={formattedTime}
                 onFinish={handleFinish}
                 isFinishing={isFinishing}
+                syncStatus={syncStatus}
             />
 
             <div className="flex-1 container mx-auto px-4 py-6 space-y-8 max-w-3xl">
@@ -251,6 +357,14 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                     setCount={totalSets}
                 />
             )}
+
+            <ConflictResolutionModal
+                isOpen={showConflictModal}
+                existingWorkoutName={cloudDraft?.templateId || "Unknown"} // Ideally we fetch the name
+                newWorkoutName={template.name}
+                onResume={handleResume}
+                onDiscard={handleDiscard}
+            />
         </div>
     );
 }

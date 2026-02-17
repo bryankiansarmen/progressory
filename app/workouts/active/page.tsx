@@ -1,5 +1,5 @@
 import { getWorkoutById } from "@/services/workout.service";
-import { getLatestLogsForExercises } from "@/services/logging.service";
+import { getLatestLogsForExercises, getExerciseTrendsForBatch } from "@/services/logging.service";
 import WorkoutPlayerContainer from "@/components/workout/player/WorkoutPlayerContainer";
 import { redirect } from "next/navigation";
 
@@ -24,6 +24,7 @@ export default async function ActiveWorkoutPage({ searchParams }: ActiveWorkoutP
     // Since we don't have auth yet, use a placeholder userId or infer from template
     const userId = template.userId;
     const historyData = await getLatestLogsForExercises(userId, exerciseIds);
+    const trendsData = await getExerciseTrendsForBatch(userId, exerciseIds, 3);
 
     return (
         <main className="min-h-screen bg-background">
@@ -31,6 +32,7 @@ export default async function ActiveWorkoutPage({ searchParams }: ActiveWorkoutP
                 template={template}
                 programDayId={programDayId}
                 historyData={historyData}
+                trendsData={trendsData}
             />
         </main>
     );

@@ -132,3 +132,35 @@ export const discardDraftSession = async (userId: string) => {
         // Ignore if record doesn't exist
     }
 };
+/**
+ * Fetch the most recent N logs for a specific exercise to use for trend analysis.
+ * Useful for calculating progressive overload targets.
+ */
+export const getExerciseTrends = async (userId: string, exerciseId: string, count: number = 3) => {
+    return await db.workoutLogEntry.findMany({
+        where: {
+            exerciseId,
+            workoutLog: { userId },
+        },
+        orderBy: { createdAt: "desc" },
+        take: count,
+        include: {
+            sets: true,
+        },
+    });
+};
+
+/**
+ * Fetch trends for a batch of exercises.
+ */
+export const getExerciseTrendsForBatch = async (userId: string, exerciseIds: string[], count: number = 3) => {
+    const trends = await Promise.all(
+        exerciseIds.map(id => getExerciseTrends(userId, id, count))
+    );
+
+    const result: Record<string, any[]> = {};
+    exerciseIds.forEach((id, index) => {
+        result[id] = trends[index];
+    });
+    return result;
+};

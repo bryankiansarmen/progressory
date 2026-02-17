@@ -11,10 +11,20 @@ import VariationSwapModal from "./VariationSwapModal";
 import FamilyReferenceCard from "./FamilyReferenceCard";
 import { useState } from "react";
 
+interface Prediction {
+    baseWeight: number;
+    baseReps: number;
+    targetWeight: number;
+    targetReps: number;
+    shouldProgress: boolean;
+    progressionType: 'weight' | 'reps' | 'none';
+}
+
 interface ExerciseLoggingCardProps {
     exercise: Exercise;
     sets: SetRecord[];
     lastLog?: any;
+    prediction?: Prediction | null;
     onUpdateSet: (index: number, data: Partial<SetRecord>) => void;
     onAddSet: () => void;
     onRemoveSet: (index: number) => void;
@@ -26,6 +36,7 @@ export default function ExerciseLoggingCard({
     exercise,
     sets,
     lastLog,
+    prediction,
     onUpdateSet,
     onAddSet,
     onRemoveSet,
@@ -65,11 +76,18 @@ export default function ExerciseLoggingCard({
                             {exercise.muscleGroup}
                         </div>
 
-                        {lastLog && lastLog.sets && lastLog.sets.length > 0 && (
-                            <div className="text-[10px] uppercase tracking-widest font-black text-white/60 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                                Last: <span className="text-white">{lastLog.sets[0].weight}kg × {lastLog.sets[0].reps}</span>
-                            </div>
-                        )}
+                        <div className="flex gap-2">
+                            {lastLog && lastLog.sets && lastLog.sets.length > 0 && (
+                                <div className="text-[10px] uppercase tracking-widest font-black text-white/60 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                                    Last: <span className="text-white">{lastLog.sets[0].weight}kg × {lastLog.sets[0].reps}</span>
+                                </div>
+                            )}
+                            {prediction && prediction.shouldProgress && (
+                                <div className="text-[10px] uppercase tracking-widest font-black text-green-400 bg-green-500/20 px-3 py-1.5 rounded-xl border border-green-500/30 animate-pulse">
+                                    Goal: <span className="text-green-300">+{(prediction.targetWeight - prediction.baseWeight).toFixed(1)}kg</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

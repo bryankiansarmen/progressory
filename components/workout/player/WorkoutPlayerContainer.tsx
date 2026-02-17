@@ -12,11 +12,13 @@ import ConflictResolutionModal from "./ConflictResolutionModal";
 import { logWorkout, getLastLogForExercise, syncDraftSession, getDraftSession, discardDraftSession } from "@/services/logging.service";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { calculatePrediction, generatePredictedSets } from "@/lib/prediction-engine";
 
 interface WorkoutPlayerContainerProps {
     template: Workout;
     programDayId?: string | null;
     historyData?: Record<string, any>;
+    trendsData?: Record<string, any[]>;
 }
 
 export interface SetRecord {
@@ -41,7 +43,7 @@ interface PersistedSession {
     updatedAt?: number;
 }
 
-export default function WorkoutPlayerContainer({ template, programDayId, historyData }: WorkoutPlayerContainerProps) {
+export default function WorkoutPlayerContainer({ template, programDayId, historyData, trendsData }: WorkoutPlayerContainerProps) {
     const router = useRouter();
     const userId = "user_123"; // Mock
 
@@ -156,15 +158,22 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                 setActiveExerciseIndex(initialState.activeExerciseIndex);
                 setRestTimeRemaining(initialState.restTimeRemaining);
             } else {
+                // Apply predictions when starting fresh (no draft)
                 setSessionData(
-                    template.exercises?.map(we => ({
-                        exercise: we.exercise!,
-                        sets: [{ reps: 0, weight: 0, isDone: false }]
-                    })) || []
+                    template.exercises?.map(we => {
+                        const exerciseId = we.exerciseId;
+                        const trends = trendsData?.[exerciseId] || [];
+                        const predictedSets = generatePredictedSets(trends, 3);
+
+                        return {
+                            exercise: we.exercise!,
+                            sets: predictedSets.length > 0 ? predictedSets : [{ reps: 0, weight: 0, isDone: false }]
+                        };
+                    }) || []
                 );
             }
         }
-    }, [isHydrated, initialState, template.exercises, showConflictModal]);
+    }, [isHydrated, initialState, template.exercises, showConflictModal, trendsData]);
 
     // Sync every 30 seconds
     useEffect(() => {
@@ -323,6 +332,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                         exercise={activeExercise.exercise}
                         sets={activeExercise.sets}
                         lastLog={lastLog}
+                        prediction={trendsData?.[activeExercise.exercise.id] ? calculatePrediction(trendsData[activeExercise.exercise.id]) : null}
                         onUpdateSet={(idx: number, data: Partial<SetRecord>) => handleUpdateSet(activeExerciseIndex, idx, data)}
                         onAddSet={() => handleAddSet(activeExerciseIndex)}
                         onRemoveSet={(idx: number) => handleRemoveSet(activeExerciseIndex, idx)}

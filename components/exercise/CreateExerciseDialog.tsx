@@ -16,8 +16,8 @@ interface CreateExerciseDialogProps {
     trigger?: React.ReactNode;
 }
 
-export default function CreateExerciseDialog({ 
-    onExerciseCreated, 
+export default function CreateExerciseDialog({
+    onExerciseCreated,
     onExerciseUpdated,
     exercise,
     trigger
@@ -69,7 +69,7 @@ export default function CreateExerciseDialog({
                 });
                 onExerciseCreated?.(created as any);
             }
-            
+
             setIsOpen(false);
             if (!isEditing) {
                 setFormData({
@@ -133,10 +133,11 @@ export default function CreateExerciseDialog({
                                 onChange={(e) => setFormData({ ...formData, muscleGroup: e.target.value })}
                             >
                                 <option>Chest</option>
-                                <option>Legs</option>
                                 <option>Back</option>
-                                <option>Arms</option>
                                 <option>Shoulders</option>
+                                <option>Biceps</option>
+                                <option>Triceps</option>
+                                <option>Legs</option>
                                 <option>Core</option>
                                 <option>FullBody</option>
                             </select>

@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Trash2, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SetRecord } from "./WorkoutPlayerContainer";
 
@@ -33,7 +33,7 @@ export default function SetLoggingRow({
     return (
         <div className={cn(
             "grid grid-cols-12 gap-3 items-center p-3 rounded-2xl transition-all duration-300",
-            set.isDone ? "bg-emerald-500/10 border-emerald-500/20" : "bg-card border-transparent",
+            set.isPR ? "bg-amber-500/10 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]" : set.isDone ? "bg-emerald-500/10 border-emerald-500/20" : "bg-card border-transparent",
             "border-2"
         )}>
             <div className="col-span-1 text-center font-black text-muted-foreground/50 italic">
@@ -84,12 +84,18 @@ export default function SetLoggingRow({
                     variant={set.isDone ? "default" : "outline"}
                     className={cn(
                         "h-12 w-12 rounded-xl border-2 transition-all duration-500",
-                        set.isDone
-                            ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/40"
-                            : "border-primary/20 hover:border-emerald-500/50 hover:bg-emerald-500/5"
+                        set.isPR
+                            ? "bg-amber-500 border-amber-400 text-white shadow-lg shadow-amber-500/40"
+                            : set.isDone
+                                ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/40"
+                                : "border-primary/20 hover:border-emerald-500/50 hover:bg-emerald-500/5"
                     )}
                 >
-                    <Check className={cn("w-6 h-6 transition-transform duration-500", set.isDone ? "scale-110" : "scale-100")} />
+                    {set.isPR ? (
+                        <Trophy className="w-6 h-6 scale-110 text-yellow-200 fill-yellow-200" />
+                    ) : (
+                        <Check className={cn("w-6 h-6 transition-transform duration-500", set.isDone ? "scale-110" : "scale-100")} />
+                    )}
                 </Button>
             </div>
         </div>

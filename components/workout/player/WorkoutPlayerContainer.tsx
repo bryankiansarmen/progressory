@@ -13,7 +13,9 @@ import { logWorkout, getLastLogForExercise, syncDraftSession, getDraftSession, d
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { calculatePrediction, generatePredictedSets } from "@/lib/prediction-engine";
-
+import { calculateBrzycki1RM } from "@/lib/utils/analytics";
+import confetti from "canvas-confetti";
+import { Trophy } from "lucide-react";
 interface WorkoutPlayerContainerProps {
     template: Workout;
     programDayId?: string | null;
@@ -25,6 +27,7 @@ export interface SetRecord {
     reps: number;
     weight: number;
     isDone: boolean;
+    isPR?: boolean;
 }
 
 export interface ExerciseSession {
@@ -60,6 +63,8 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
     const [restTimeRemaining, setRestTimeRemaining] = useState<number | null>(null);
     const [isFinishing, setIsFinishing] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
+    const [achievedPrSetIds, setAchievedPrSetIds] = useState<Set<string>>(new Set());
+    const [showPrToast, setShowPrToast] = useState(false);
 
     // Timer hook
     const { formattedTime, seconds } = useWorkoutTimer(initialState?.seconds || 0);
@@ -250,8 +255,59 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
     const handleToggleSetDone = (exerciseIndex: number, setIndex: number) => {
         const set = sessionData[exerciseIndex].sets[setIndex];
         const currentDone = set.isDone;
+        let isNewPR = false;
 
-        handleUpdateSet(exerciseIndex, setIndex, { isDone: !currentDone });
+        if (!currentDone) {
+            const exerciseId = sessionData[exerciseIndex].exercise.id;
+            const history = trendsData?.[exerciseId] || [];
+            const current1RM = calculateBrzycki1RM(set.weight, set.reps);
+
+            let maxHistory1RM = 0;
+            history.forEach(log => {
+                log.sets.forEach((s: any) => {
+                    const estimated1RM = calculateBrzycki1RM(s.weight, s.reps);
+                    if (estimated1RM > maxHistory1RM) {
+                        maxHistory1RM = estimated1RM;
+                    }
+                });
+            });
+
+            const setId = `${exerciseIndex}-${setIndex}`;
+
+            if (current1RM > maxHistory1RM && maxHistory1RM > 0 && !achievedPrSetIds.has(setId)) {
+                isNewPR = true;
+                setAchievedPrSetIds(prev => new Set(prev).add(setId));
+                setSessionData(prev => prev.map((ed, exIdx) => {
+                    if (exIdx !== exerciseIndex) return ed;
+                    return {
+                        ...ed,
+                        sets: ed.sets.map((s, sIdx) => {
+                            if (sIdx !== setIndex) return s;
+                            return { ...s, isDone: true, isPR: true };
+                        })
+                    };
+                }));
+
+                // Trigger Celebration
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#10b981', '#34d399', '#f59e0b', '#fbbf24']
+                });
+
+                if ("vibrate" in navigator) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+
+                setShowPrToast(true);
+                setTimeout(() => setShowPrToast(false), 3000);
+            }
+        }
+
+        if (!isNewPR) {
+            handleUpdateSet(exerciseIndex, setIndex, { isDone: !currentDone });
+        }
 
         if (!currentDone) {
             setRestTimeRemaining(sessionData[exerciseIndex].exercise.restTime || 90);
@@ -375,6 +431,14 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
                 onResume={handleResume}
                 onDiscard={handleDiscard}
             />
+
+            {/* PR Toast Overlay */}
+            <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out ${showPrToast ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
+                <div className="bg-amber-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-xl shadow-amber-500/20 font-bold border-2 border-amber-400">
+                    <Trophy className="w-5 h-5 text-yellow-200 fill-yellow-200" />
+                    New Personal Record!
+                </div>
+            </div>
         </div>
     );
 }

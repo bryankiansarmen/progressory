@@ -183,6 +183,9 @@ Phase 1 - MVP (Personal Use)
 -   Reorder exercises within a workout
 
 -   Track active session duration with a live timer
+-   **Automated Rest Timer:** Automatically triggers a customizable rest interval after marking a set as done
+-   **Gym-Proof Offline Sync:** Hybrid synchronization using Cloud (Server Actions) and LocalStorage to ensure no data loss in poor connectivity
+-   **Smart Pre-filling:** Automatically predicts next-session weight and reps based on historical performance trends
 
 **Exercise Library**
 
@@ -321,6 +324,7 @@ State Management Strategy
 -   URL State: Next.js searchParams for filters, pagination, and active session state
 
 -   Local UI State: React useState/useReducer or Context API for ephemeral UI state
+-   **Active Session State:** Persisted via hybrid LocalStorage + DraftSession DB model for high-reliability workout logging
 
 Coding Standards and Best Practices
 

@@ -168,76 +168,54 @@ Critical Indexes
 
 Core Features
 
-Phase 1 - MVP (Personal Use)
+### Phase 1 - Foundation & Core Logging (Completed)
 
 **Workout Logging**
+- Create and manage workout templates
+- Start active workout sessions based on templates
+- Add exercises to active sessions on-the-fly
+- Log sets with reps and weight
+- Reorder exercises within a workout
+- Track active session duration with a live timer
 
--   Create and manage workout templates
+**Exercise Library & History**
+- Browse exercises by category or muscle group
+- Search exercises by name (including variations)
+- **Exercise Hierarchy:** Manage parent movements and their variations
+- **Exercise Archiving:** Soft-delete custom exercises
+- View past workout sessions in chronological order
+- Filter sessions by date range
 
--   Start active workout sessions based on templates
+**Basic Dashboard**
+- Quick stats overview
+- Recent activity feed
 
--   Add exercises to active sessions on-the-fly
+### Phase 2 - Analytics & Advanced Tools (Completed)
 
--   Log sets with reps and weight
+**Smart Insights & Feedback**
+- **Real-time PR Detection:** Immediate celebration and tracking of personal records during workouts.
+- **Fatigue Heatmap:** Visual body map showing muscle group fatigue based on recent volume.
+- **Smart Pre-filling:** Predicts next-session weight and reps based on historical performance trends.
+- **Gym-Proof Offline Sync:** Hybrid synchronization using Cloud and LocalStorage.
+- **Plate Calculator:** On-demand barbell plate math utility.
+- Visualize workout consistency and frequency.
 
--   Reorder exercises within a workout
+### Phase 3 - Programs & Periodization (Completed)
 
--   Track active session duration with a live timer
--   **Automated Rest Timer:** Automatically triggers a customizable rest interval after marking a set as done
--   **Gym-Proof Offline Sync:** Hybrid synchronization using Cloud (Server Actions) and LocalStorage to ensure no data loss in poor connectivity
--   **Smart Pre-filling:** Automatically predicts next-session weight and reps based on historical performance trends
+**Structured Training**
+- Create multi-week workout programs.
+- Assign existing workout templates to specific days/weeks.
+- Track active program progress and schedule directly on the Dashboard.
+- Advanced analytics for long-term volume trends.
+- Automated Rest Timers between sets.
 
-**Exercise Library**
+### Phase 4 - Multi-User Scaling (Future)
 
--   Browse exercises by category or muscle group
-
--   Search exercises by name (including variations)
-
--   **Exercise Hierarchy:** Manage parent movements and their variations (e.g., Squat -> Goblet Squat)
-
--   **Exercise Archiving:** Soft-delete custom exercises to keep the library clean
-
--   Create and manage custom exercises
-
--   View exercise history and performance trends
-
-**Workout History**
-
--   View past workout sessions in chronological order
-
--   Filter sessions by date range
-
--   View detailed summaries of completed workouts
-
-**Progress Tracking**
-
--   View progress charts for individual exercises
-
--   Track personal records (PRs)
-
--   Visualize workout consistency and frequency
-
-**Dashboard**
-
--   Quick stats overview (total volume, recent PRs, consistency)
-
--   Recent activity feed
-
--   Quick actions for starting workouts and managing exercises
-
-Phase 2 - Multi-User Scaling (Future)
-
--   User authentication and authorization (Clerk or NextAuth)
-
--   User profile management
-
--   Rate limiting and request throttling
-
--   Data privacy and user data isolation
-
--   Optional: Social features (share workouts, follow users)
-
--   Optional: Workout templates and programs
+**Cloud & Social**
+- User authentication and authorization (Clerk or NextAuth)
+- User profile management
+- Rate limiting, request throttling, and data privacy isolation
+- Social features (share workouts, follow users)
 
 Application Architecture
 
@@ -544,39 +522,26 @@ Phase 2 (Multi-User)
 -   Add Content Security Policy headers
 
 -   Regular dependency updates and security audits
-
 Future Enhancements and Roadmap
 
-Short-term (Post-MVP)
+### Phase 3 Focus (Completed)
+- Implement Program Builder (creating multi-week routines).
+- Implement Active Program tracking on the Dashboard.
+- Rest timer functionality within the active workout player.
+- Advanced volume analytics and muscle group balance charts.
 
--   Workout templates and programs
+### Phase 4 Focus (Future)
+- User Authentication integration.
+- Progressive web app (PWA) with full offline capabilities.
+- Mobile app (React Native with Expo).
+- Social sharing of workout programs and templates.
 
--   Export workout data to CSV or PDF
-
--   Advanced analytics (volume trends, muscle group balance)
-
--   Rest timer functionality
-
-Medium-term
-
--   Progressive web app (PWA) with offline capability
-
--   Mobile app (React Native with Expo)
-
--   Social features (share workouts, follow friends)
-
--   Integration with fitness wearables
-
-Long-term
-
--   AI-powered workout recommendations
-
--   Video exercise demonstrations
-
--   Nutrition tracking integration
-
--   Marketplace for workout programs
-
+### Long-term Vision
+- AI-powered workout and progression recommendations.
+- Integration with fitness wearables (Apple Health, Garmin).
+- Nutrition tracking integration.
+- Video exercise demonstrations.
+- Marketplace for structured workout programs.
 Development Workflow
 
 Getting Started

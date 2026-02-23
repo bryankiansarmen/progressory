@@ -198,7 +198,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
 
     // Persistence to LocalStorage on change
     useEffect(() => {
-        if (!isHydrated || showConflictModal) return;
+        if (!isHydrated || showConflictModal || isFinishing || showSummary) return;
 
         const state: PersistedSession = {
             templateId: template.id,
@@ -209,7 +209,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
             updatedAt: Date.now()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }, [isHydrated, template.id, sessionData, seconds, activeExerciseIndex, restTimeRemaining, showConflictModal]);
+    }, [isHydrated, template.id, sessionData, seconds, activeExerciseIndex, restTimeRemaining, showConflictModal, isFinishing, showSummary]);
 
     const activeExercise = sessionData[activeExerciseIndex];
     const lastLog = activeExercise && historyData ? historyData[activeExercise.exercise.id] : null;

@@ -26,24 +26,27 @@ export default function ConsistencyChart({ days }: ConsistencyChartProps) {
             </div>
 
             <div className="grid grid-cols-7 gap-3">
-                {days.map((active, i) => (
-                    <div key={i} className="flex flex-col items-center gap-3">
-                        <div className={cn(
-                            "w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-500 border-2",
-                            active
-                                ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30 scale-105"
-                                : "bg-muted/30 border-dashed border-muted-foreground/20 text-muted-foreground/30"
-                        )}>
-                            {active && <Check className="w-5 h-5 stroke-[3px]" />}
+                {days.map((active, i) => {
+                    const dayName = dayNames[i];
+                    return (
+                        <div key={i} className="flex flex-col items-center gap-3">
+                            <div className={cn(
+                                "w-full aspect-square rounded-2xl flex items-center justify-center transition-all duration-500 border-2",
+                                active
+                                    ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-500/30 scale-105"
+                                    : "bg-muted/30 border-dashed border-muted-foreground/20 text-muted-foreground/30"
+                            )}>
+                                {active && <Check className="w-5 h-5 stroke-[3px]" />}
+                            </div>
+                            <span className={cn(
+                                "text-[10px] font-black uppercase tracking-tighter",
+                                active ? "text-emerald-600" : "text-muted-foreground/40"
+                            )}>
+                                {dayName}
+                            </span>
                         </div>
-                        <span className={cn(
-                            "text-[10px] font-black uppercase tracking-tighter",
-                            active ? "text-emerald-600" : "text-muted-foreground/40"
-                        )}>
-                            Day {i + 1}
-                        </span>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
         </div>
     );

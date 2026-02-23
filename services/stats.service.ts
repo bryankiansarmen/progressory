@@ -3,6 +3,7 @@
 import db from "@/lib/db";
 import { subDays, startOfDay } from "date-fns";
 import { calculateBrzycki1RM } from "@/lib/utils/analytics";
+import { FatigueLevel, MuscleFatigueEntry, normalizeFatigueLevel } from "@/lib/utils/fatigue";
 
 export interface DashboardStats {
     weeklyVolume: number;
@@ -313,6 +314,39 @@ export const getMuscleDistribution = async (userId: string): Promise<MuscleDistr
             percentage: totalSets > 0 ? Math.round((setCount / totalSets) * 100) : 0
         }))
         .sort((a, b) => b.setCount - a.setCount);
+};
+
+/**
+ * Aggregates completed sets per muscle group for the last 7 days,
+ * then maps each group to a fatigue intensity level.
+ */
+export const getMuscleFatigueData = async (userId: string): Promise<MuscleFatigueEntry[]> => {
+    const sevenDaysAgo = subDays(startOfDay(new Date()), 7);
+
+    const entries = await db.workoutLogEntry.findMany({
+        where: {
+            workoutLog: {
+                userId,
+                date: { gte: sevenDaysAgo }
+            }
+        },
+        include: {
+            exercise: true,
+            sets: { where: { isDone: true } }
+        }
+    });
+
+    const counts: Record<string, number> = {};
+    entries.forEach(entry => {
+        const mg = entry.exercise.muscleGroup;
+        counts[mg] = (counts[mg] || 0) + entry.sets.length;
+    });
+
+    return Object.entries(counts).map(([muscleGroup, setCount]) => ({
+        muscleGroup,
+        setCount,
+        level: normalizeFatigueLevel(setCount)
+    }));
 };
 
 export interface FamilyPerformance {

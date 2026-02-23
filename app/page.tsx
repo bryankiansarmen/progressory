@@ -1,10 +1,11 @@
-import { getDashboardStats } from "@/services/stats.service";
+import { getDashboardStats, getMuscleFatigueData } from "@/services/stats.service";
 import { getActiveProgram, getProgramProgress } from "@/services/program.service";
 import DashboardStatCard from "@/components/dashboard/DashboardStatCard";
 import ActiveProgramCard from "@/components/dashboard/ActiveProgramCard";
 import ConsistencyChart from "@/components/dashboard/ConsistencyChart";
 import RecentPRList from "@/components/dashboard/RecentPRList";
 import QuickActions from "@/components/dashboard/QuickActions";
+import FatigueHeatmap from "@/components/dashboard/FatigueHeatmap";
 import { Dumbbell, Flame, TrendingUp } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -12,6 +13,7 @@ export default async function DashboardPage() {
   const stats = await getDashboardStats(userId);
   const activeProgram = await getActiveProgram(userId);
   const programProgress = activeProgram ? await getProgramProgress(activeProgram.id) : null;
+  const fatigueData = await getMuscleFatigueData(userId);
 
   return (
     <main className="min-h-screen bg-background text-foreground pb-20">
@@ -65,6 +67,8 @@ export default async function DashboardPage() {
           )}
 
           <ConsistencyChart days={stats.activityDays} />
+
+          <FatigueHeatmap data={fatigueData} />
 
           <div className="space-y-6">
             <h3 className="font-black text-2xl px-1">Quick Start</h3>

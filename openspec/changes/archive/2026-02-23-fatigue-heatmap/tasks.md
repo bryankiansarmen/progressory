@@ -13,6 +13,6 @@
 
 # Verification
 
-- [ ] 3.1 Log a workout for a specific muscle group and verify that the heatmap updates on the dashboard.
-- [ ] 3.2 Verify that the color graduation shifts correctly as volume increases for a specific muscle group.
-- [ ] 3.3 Ensure the heatmap is responsive and fits well within the Dashboard layout on mobile and desktop.
+- [x] 3.1 Log a workout for a specific muscle group and verify that the heatmap updates on the dashboard.
+- [x] 3.2 Verify that the color graduation shifts correctly as volume increases for a specific muscle group.
+- [x] 3.3 Ensure the heatmap is responsive and fits well within the Dashboard layout on mobile and desktop.

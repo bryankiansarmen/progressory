@@ -34,3 +34,11 @@ The system SHALL support initializing a `WorkoutLog` directly from a specific da
 - **THEN** the system SHALL create a `WorkoutLog` record associated with that `Program`
 - **AND** populate it with entries from the template assigned to that program day.
 
+### Requirement: Barbell Plate Calculation Logic
+The system MUST accurately calculate the smallest number of standard plates required to reach a target weight given a specific barbell weight.
+
+#### Scenario: Basic Plate Math
+- **WHEN** a target weight is provided (e.g., 100kg) and a bar weight is set (e.g., 20kg)
+- **THEN** the system MUST determine the optimal combination of standard plates (e.g., 2x20kg per side) for both Metric and Imperial systems.
+- **AND** it MUST allow users to toggle between standard bar weights (15kg, 20kg).
+

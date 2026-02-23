@@ -17,3 +17,11 @@ The system SHALL MUST display a list of the top 3 most recent Personal Records a
 - **WHEN** the user scrolls to the "Achievements" section
 - **THEN** the system SHALL show the exercise name, weight, and date of the PR.
 
+### Requirement: Muscle Group Fatigue Aggregation
+The system MUST calculate a "fatigue score" for each muscle group based on the total number of sets performed for that group over the last 7 days.
+
+#### Scenario: Fatigue Color Graduation
+- **WHEN** a muscle group's weekly volume is retrieved
+- **THEN** the system MUST display the group in a visual heatmap with intensity colors: Cool (1-3 sets), Active (4-7 sets), and Fatigued (8+ sets).
+- **AND** tapping a muscle group SHALL display the specific set count.
+

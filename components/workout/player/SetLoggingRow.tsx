@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Trash2, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SetRecord } from "./WorkoutPlayerContainer";
+import { PlateCalculatorPopover } from "./PlateCalculatorPopover";
 
 interface SetLoggingRowProps {
     setNumber: number;
@@ -40,17 +41,20 @@ export default function SetLoggingRow({
                 {setNumber}
             </div>
 
-            <div className="col-span-4 flex flex-col gap-1">
-                <div className="relative group">
-                    <Input
-                        type="number"
-                        placeholder={lastLogSet ? `${lastLogSet.weight}` : "0"}
-                        value={set.weight || ""}
-                        onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || 0 })}
-                        disabled={set.isDone}
-                        className="h-12 rounded-xl text-center font-bold text-lg bg-background/50 border-none shadow-inner"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase opacity-50 group-hover:opacity-100 transition-opacity">kg</span>
+            <div className="col-span-5 flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                    <div className="relative group flex-1">
+                        <Input
+                            type="number"
+                            placeholder={lastLogSet ? `${lastLogSet.weight}` : "0"}
+                            value={set.weight || ""}
+                            onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || 0 })}
+                            disabled={set.isDone}
+                            className="h-12 rounded-xl text-center font-bold text-lg bg-background/50 border-none shadow-inner"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase opacity-50 group-hover:opacity-100 transition-opacity">kg</span>
+                    </div>
+                    {!set.isDone && <PlateCalculatorPopover currentWeight={set.weight || 0} />}
                 </div>
             </div>
 
@@ -68,7 +72,7 @@ export default function SetLoggingRow({
                 </div>
             </div>
 
-            <div className="col-span-4 flex items-center justify-end gap-2">
+            <div className="col-span-3 flex items-center justify-end gap-2">
                 <Button
                     variant="ghost"
                     size="icon"

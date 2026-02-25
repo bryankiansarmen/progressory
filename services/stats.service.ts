@@ -1,7 +1,7 @@
 "use server";
 
 import db from "@/lib/db";
-import { subDays, startOfDay } from "date-fns";
+import { subDays, startOfDay, startOfWeek } from "date-fns";
 import { calculateBrzycki1RM } from "@/lib/utils/analytics";
 import { FatigueLevel, MuscleFatigueEntry, normalizeFatigueLevel } from "@/lib/utils/fatigue";
 
@@ -65,14 +65,14 @@ export const getStrengthScore = async (userId: string): Promise<number> => {
 
 export const getDashboardStats = async (userId: string): Promise<DashboardStats> => {
     const now = new Date();
-    const sevenDaysAgo = subDays(startOfDay(now), 7);
+    const weekStart = startOfWeek(startOfDay(now), { weekStartsOn: 0 }); // Sunday
 
-    // Fetch all logs for the last 7 days for volume and frequency
+    // Fetch all logs for the current calendar week for volume and frequency
     const recentLogs = await db.workoutLog.findMany({
         where: {
             userId,
             date: {
-                gte: sevenDaysAgo,
+                gte: weekStart,
             },
         },
         include: {
@@ -96,13 +96,11 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         });
     });
 
-    // Activity Days (last 7 days)
+    // Activity Days (Calendar Week Sunday-Saturday)
     const activityDays = Array(7).fill(false);
     recentLogs.forEach(log => {
-        const dayDiff = Math.floor((now.getTime() - log.date.getTime()) / (1000 * 60 * 60 * 24));
-        if (dayDiff >= 0 && dayDiff < 7) {
-            activityDays[6 - dayDiff] = true; // Map to [D-6, D-5, ..., Today]
-        }
+        const dayOfWeek = log.date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        activityDays[dayOfWeek] = true;
     });
 
     // Fetch Recent PRs (Real 1RM-based PRs)

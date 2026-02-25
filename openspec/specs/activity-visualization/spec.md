@@ -4,11 +4,11 @@
 TBD - created by archiving change implement-home-dashboard. Update Purpose after archive.
 ## Requirements
 ### Requirement: Consistency Chart
-The dashboard SHALL display a visual representation of workout frequency over the last 7 days.
+The dashboard SHALL display a visual representation of workout frequency over the current calendar week (Sunday through Saturday).
 
 #### Scenario: Visual status
 - **WHEN** viewing the main dashboard
-- **THEN** a chart or a row of activity bubbles SHALL indicate which days had completed workouts.
+- **THEN** a chart or a row of activity bubbles SHALL indicate which days had completed workouts, aligned to a fixed Sunday-to-Saturday grid.
 
 ### Requirement: Top PRs List
 The system SHALL MUST display a list of the top 3 most recent Personal Records achieved by the user.

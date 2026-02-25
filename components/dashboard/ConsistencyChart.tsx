@@ -8,10 +8,7 @@ interface ConsistencyChartProps {
 }
 
 export default function ConsistencyChart({ days }: ConsistencyChartProps) {
-    const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-    // We get last 7 days from service [D-6, ..., Today]
-    // We want to display them with labels. Let's assume the array is aligned to the labels for now.
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
         <div className="bg-card/40 border-2 rounded-3xl p-6 backdrop-blur-sm">

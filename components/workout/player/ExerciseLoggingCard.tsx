@@ -69,7 +69,7 @@ export default function ExerciseLoggingCard({
                             </Button>
                         </div>
                     </div>
-                    <h2 className="text-3xl font-black tracking-tight">{exercise.name}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{exercise.name}</h2>
                     <div className="flex justify-between items-end mt-4">
                         <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-medium">
                             <Dumbbell className="w-3.5 h-3.5" />
@@ -91,12 +91,12 @@ export default function ExerciseLoggingCard({
                     </div>
                 </div>
 
-                <CardContent className="p-6 space-y-4">
-                    <div className="grid grid-cols-12 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">
+                <CardContent className="p-4 sm:p-6 space-y-4">
+                    <div className="grid grid-cols-[30px_1fr_1fr_auto] sm:grid-cols-12 px-2 sm:px-3 text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">
                         <div className="col-span-1 text-center">Set</div>
-                        <div className="col-span-4 text-center">Weight</div>
-                        <div className="col-span-3 text-center">Reps</div>
-                        <div className="col-span-4 text-right pr-4">Status</div>
+                        <div className="col-span-1 sm:col-span-4 text-center">Weight</div>
+                        <div className="col-span-1 sm:col-span-3 text-center">Reps</div>
+                        <div className="col-span-1 sm:col-span-4 text-right pr-2 sm:pr-4">Status</div>
                     </div>
 
                     <div className="space-y-3">
@@ -114,10 +114,10 @@ export default function ExerciseLoggingCard({
                     </div>
                 </CardContent>
 
-                <CardFooter className="p-6 pt-0">
+                <CardFooter className="p-4 sm:p-6 pt-0">
                     <Button
                         variant="outline"
-                        className="w-full h-14 rounded-2xl border-2 border-dashed border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2"
+                        className="w-full h-12 sm:h-14 rounded-2xl border-2 border-dashed border-primary/30 text-primary hover:bg-primary/5 font-bold gap-2"
                         onClick={onAddSet}
                     >
                         <Plus className="w-5 h-5" />

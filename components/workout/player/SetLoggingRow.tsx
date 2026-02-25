@@ -33,16 +33,16 @@ export default function SetLoggingRow({
 
     return (
         <div className={cn(
-            "grid grid-cols-12 gap-3 items-center p-3 rounded-2xl transition-all duration-300",
+            "grid grid-cols-[30px_1fr_1fr_auto] sm:grid-cols-12 gap-2 sm:gap-3 items-center p-2 sm:p-3 rounded-2xl transition-all duration-300",
             set.isPR ? "bg-amber-500/10 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.2)]" : set.isDone ? "bg-emerald-500/10 border-emerald-500/20" : "bg-card border-transparent",
             "border-2"
         )}>
-            <div className="col-span-1 text-center font-black text-muted-foreground/50 italic">
+            <div className="col-span-1 text-center font-black text-muted-foreground/50 italic text-sm sm:text-base">
                 {setNumber}
             </div>
 
-            <div className="col-span-5 flex flex-col gap-1">
-                <div className="flex items-center gap-2">
+            <div className="col-span-1 sm:col-span-5 flex flex-col gap-1">
+                <div className="flex items-center gap-1 sm:gap-2">
                     <div className="relative group flex-1">
                         <Input
                             type="number"
@@ -50,15 +50,15 @@ export default function SetLoggingRow({
                             value={set.weight || ""}
                             onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || 0 })}
                             disabled={set.isDone}
-                            className="h-12 rounded-xl text-center font-bold text-lg bg-background/50 border-none shadow-inner"
+                            className="h-10 sm:h-12 rounded-xl text-center font-bold text-base sm:text-lg bg-background/50 border-none shadow-inner px-2"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase opacity-50 group-hover:opacity-100 transition-opacity">kg</span>
+                        <span className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase opacity-40 group-hover:opacity-100 transition-opacity pointer-events-none">kg</span>
                     </div>
                     {!set.isDone && <PlateCalculatorPopover currentWeight={set.weight || 0} />}
                 </div>
             </div>
 
-            <div className="col-span-3 flex flex-col gap-1">
+            <div className="col-span-1 sm:col-span-3 flex flex-col gap-1">
                 <div className="relative group">
                     <Input
                         type="number"
@@ -66,28 +66,27 @@ export default function SetLoggingRow({
                         value={set.reps || ""}
                         onChange={(e) => onUpdate({ reps: parseInt(e.target.value) || 0 })}
                         disabled={set.isDone}
-                        className="h-12 rounded-xl text-center font-bold text-lg bg-background/50 border-none shadow-inner"
+                        className="h-10 sm:h-12 rounded-xl text-center font-bold text-base sm:text-lg bg-background/50 border-none shadow-inner px-2"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase opacity-50 group-hover:opacity-100 transition-opacity">reps</span>
+                    <span className="absolute right-1.5 sm:right-3 top-1/2 -translate-y-1/2 text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase opacity-40 group-hover:opacity-100 transition-opacity pointer-events-none">reps</span>
                 </div>
             </div>
 
-            <div className="col-span-3 flex items-center justify-end gap-2">
+            <div className="col-span-1 sm:col-span-3 flex items-center justify-end gap-1.5 sm:gap-2">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onRemove}
                     disabled={set.isDone}
-                    className="rounded-xl h-12 w-12 text-destructive hover:bg-destructive/10"
+                    className="rounded-xl h-10 w-10 sm:h-12 sm:w-12 text-destructive hover:bg-destructive/10"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Button>
-
                 <Button
                     onClick={handleToggle}
                     variant={set.isDone ? "default" : "outline"}
                     className={cn(
-                        "h-12 w-12 rounded-xl border-2 transition-all duration-500",
+                        "h-10 w-10 sm:h-12 sm:w-12 rounded-xl border-2 transition-all duration-500",
                         set.isPR
                             ? "bg-amber-500 border-amber-400 text-white shadow-lg shadow-amber-500/40"
                             : set.isDone
@@ -96,9 +95,9 @@ export default function SetLoggingRow({
                     )}
                 >
                     {set.isPR ? (
-                        <Trophy className="w-6 h-6 scale-110 text-yellow-200 fill-yellow-200" />
+                        <Trophy className="w-5 h-5 sm:w-6 sm:h-6 scale-110 text-yellow-200 fill-yellow-200" />
                     ) : (
-                        <Check className={cn("w-6 h-6 transition-transform duration-500", set.isDone ? "scale-110" : "scale-100")} />
+                        <Check className={cn("w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-500", set.isDone ? "scale-110" : "scale-100")} />
                     )}
                 </Button>
             </div>

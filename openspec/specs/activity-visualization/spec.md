@@ -25,3 +25,18 @@ The system MUST calculate a "fatigue score" for each muscle group based on the t
 - **THEN** the system MUST display the group in a visual heatmap with intensity colors: Cool (1-3 sets), Active (4-7 sets), and Fatigued (8+ sets).
 - **AND** tapping a muscle group SHALL display the specific set count.
 
+### Requirement: Dynamic Trend Visibility
+The dashboard's "Weekly Volume" card must display the computed trend instead of hardcoded data.
+
+#### Scenario: Positive Trend
+- **WHEN** the trend is +15%
+- **THEN** the UI should show a green "▲ 15% Effort" badge
+
+#### Scenario: Negative Trend
+- **WHEN** the trend is -5%
+- **THEN** the UI should show a red "▼ 5% Effort" badge
+
+#### Scenario: No Trend Available
+- **WHEN** no previous week data exists
+- **THEN** the trend badge should be hidden or show "New"
+

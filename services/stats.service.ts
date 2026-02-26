@@ -16,6 +16,10 @@ export interface DashboardStats {
         date: string;
     }[];
     strengthScore: number;
+    volumeTrend: {
+        value: number;
+        positive: boolean;
+    } | null;
 }
 
 /**
@@ -63,11 +67,47 @@ export const getStrengthScore = async (userId: string): Promise<number> => {
     return Math.round(totalScore);
 };
 
+/**
+ * Calculates total volume for a specific user within a date range.
+ */
+export const calculateVolumeForRange = async (userId: string, start: Date, end: Date): Promise<number> => {
+    const logs = await db.workoutLog.findMany({
+        where: {
+            userId,
+            date: {
+                gte: start,
+                lt: end,
+            },
+        },
+        include: {
+            entries: {
+                include: {
+                    sets: {
+                        where: { isDone: true }
+                    },
+                },
+            },
+        },
+    });
+
+    let totalVolume = 0;
+    logs.forEach(log => {
+        log.entries.forEach(entry => {
+            entry.sets.forEach(set => {
+                totalVolume += set.weight * set.reps;
+            });
+        });
+    });
+
+    return totalVolume;
+};
+
 export const getDashboardStats = async (userId: string): Promise<DashboardStats> => {
     const now = new Date();
     const weekStart = startOfWeek(startOfDay(now), { weekStartsOn: 0 }); // Sunday
+    const lastWeekStart = subDays(weekStart, 7);
 
-    // Fetch all logs for the current calendar week for volume and frequency
+    // Fetch Current Week Volume and Logs
     const recentLogs = await db.workoutLog.findMany({
         where: {
             userId,
@@ -86,15 +126,27 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
         },
     });
 
-    // Calculate Weekly Volume
-    let totalVolume = 0;
+    let currentVolume = 0;
     recentLogs.forEach(log => {
         log.entries.forEach(entry => {
             entry.sets.forEach(set => {
-                totalVolume += set.weight * set.reps;
+                currentVolume += set.weight * set.reps;
             });
         });
     });
+
+    // Fetch Previous Week Volume
+    const previousVolume = await calculateVolumeForRange(userId, lastWeekStart, weekStart);
+
+    // Calculate Trend
+    let volumeTrend: DashboardStats['volumeTrend'] = null;
+    if (previousVolume > 0) {
+        const trendValue = ((currentVolume / previousVolume) - 1) * 100;
+        volumeTrend = {
+            value: Math.abs(Math.round(trendValue)),
+            positive: trendValue >= 0
+        };
+    }
 
     // Activity Days (Calendar Week Sunday-Saturday)
     const activityDays = Array(7).fill(false);
@@ -145,11 +197,12 @@ export const getDashboardStats = async (userId: string): Promise<DashboardStats>
     const strengthScore = await getStrengthScore(userId);
 
     return {
-        weeklyVolume: Math.round(totalVolume),
+        weeklyVolume: Math.round(currentVolume),
         weeklySessions: recentLogs.length,
         activityDays,
         recentPRs: Array.from(prMap.values()).slice(0, 3),
         strengthScore,
+        volumeTrend,
     };
 };
 

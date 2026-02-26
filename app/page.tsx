@@ -32,7 +32,10 @@ export default async function DashboardPage() {
               unit="kg"
               icon={<TrendingUp className="w-12 h-12" />}
               description="Total weight moved this week"
-              trend={{ value: "12%", positive: true }}
+              trend={stats.volumeTrend ? {
+                value: `${stats.volumeTrend.value}%`,
+                positive: stats.volumeTrend.positive
+              } : undefined}
               color="primary"
             />
             <DashboardStatCard

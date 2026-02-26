@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Timer, SkipForward, Plus, RotateCcw } from "lucide-react";
-import { cn } from "@/lib/utils";
+
 import { useAudio } from "@/hooks/useAudio";
 
 interface RestTimerProps {

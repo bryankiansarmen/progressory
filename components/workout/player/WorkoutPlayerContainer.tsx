@@ -9,7 +9,7 @@ import SessionSummary from "./SessionSummary";
 import RestTimer from "./RestTimer";
 import SessionCompleteModal from "./SessionCompleteModal";
 import ConflictResolutionModal from "./ConflictResolutionModal";
-import { logWorkout, getLastLogForExercise, syncDraftSession, getDraftSession, discardDraftSession } from "@/services/logging.service";
+import { logWorkout, syncDraftSession, getDraftSession, discardDraftSession } from "@/services/logging.service";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { calculatePrediction, generatePredictedSets } from "@/lib/prediction-engine";
@@ -76,7 +76,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
         syncDataRef.current = { sessionData, seconds, activeExerciseIndex };
     }, [sessionData, seconds, activeExerciseIndex]);
 
-    const performSync = useCallback(async (isManual = false) => {
+    const performSync = useCallback(async () => {
         if (!isHydrated || showConflictModal || isFinishing) return;
 
         setSyncStatus("syncing");
@@ -96,7 +96,7 @@ export default function WorkoutPlayerContainer({ template, programDayId, history
             const elapsed = Date.now() - startTime;
             const delay = Math.max(0, 800 - elapsed);
             setTimeout(() => setSyncStatus("saved"), delay);
-        } catch (e) {
+        } catch {
             setSyncStatus("error");
         }
     }, [isHydrated, showConflictModal, isFinishing, userId, template.id]);

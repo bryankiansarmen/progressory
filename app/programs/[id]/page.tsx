@@ -2,7 +2,7 @@ import { getProgramById, getProgramProgress } from "@/services/program.service";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, CheckCircle2, LayoutList, ArrowLeft, Edit2 } from "lucide-react";
+import { CheckCircle2, LayoutList, ArrowLeft, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

@@ -1,4 +1,4 @@
-import * as React from "react";
+import { forwardRef, type ComponentProps } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -6,7 +6,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+const Input = forwardRef<HTMLInputElement, ComponentProps<"input">>(
     ({ className, type, ...props }, ref) => {
         return (
             <input

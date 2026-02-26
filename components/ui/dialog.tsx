@@ -1,18 +1,18 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+
 
 interface DialogProps {
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
-export function Dialog({ open, onOpenChange, children }: DialogProps) {
-    React.useEffect(() => {
+export function Dialog({ open, children }: DialogProps) {
+    useEffect(() => {
         if (open) {
             document.body.style.overflow = "hidden";
         } else {
@@ -29,9 +29,9 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     return <div data-state={open ? "open" : "closed"}>{children}</div>;
 }
 
-export function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
-    const [mounted, setMounted] = React.useState(false);
-    React.useEffect(() => setMounted(true), []);
+export function DialogContent({ children, className }: { children: ReactNode; className?: string }) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
 
     if (!mounted) return null;
 
@@ -46,18 +46,18 @@ export function DialogContent({ children, className }: { children: React.ReactNo
     );
 }
 
-export function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DialogHeader({ children, className }: { children: ReactNode; className?: string }) {
     return <div className={cn("flex flex-col space-y-1.5", className)}>{children}</div>;
 }
 
-export function DialogTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DialogTitle({ children, className }: { children: ReactNode; className?: string }) {
     return <h2 className={cn("text-lg font-semibold leading-none tracking-tight", className)}>{children}</h2>;
 }
 
-export function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DialogDescription({ children, className }: { children: ReactNode; className?: string }) {
     return <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>;
 }
 
-export function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
+export function DialogFooter({ children, className }: { children: ReactNode; className?: string }) {
     return <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}>{children}</div>;
 }

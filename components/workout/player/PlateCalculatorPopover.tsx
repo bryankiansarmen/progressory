@@ -16,7 +16,7 @@ interface PlateCalculatorPopoverProps {
 
 export function PlateCalculatorPopover({ currentWeight }: PlateCalculatorPopoverProps) {
     const [barWeight, setBarWeight] = useState<number>(20);
-    const [unit, setUnit] = useState<PlateUnit>("kg"); // Defaulting to kg as per project settings
+    const [unit] = useState<PlateUnit>("kg"); // Defaulting to kg as per project settings
 
     const requiredPlates: PlateResult[] = calcBarbellPlates(currentWeight, barWeight, unit);
 

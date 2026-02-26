@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Workout } from "@/types";
 import { Input } from "@/components/ui/input";
-import { Search, Check, Dumbbell, Coffee, Plus } from "lucide-react";
+import { Search, Check, Dumbbell, Coffee } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, getWorkoutMuscleGroups } from "@/lib/utils";
 

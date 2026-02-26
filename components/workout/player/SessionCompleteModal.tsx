@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Trophy, ArrowRight, Share2 } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+
 
 import confetti from "canvas-confetti";
 import { useEffect } from "react";

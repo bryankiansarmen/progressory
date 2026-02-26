@@ -12,9 +12,7 @@ interface AreaChartProps {
     height?: number;
 }
 
-export default function AreaChart({ data, height = 300 }: AreaChartProps) {
-    const padding = 40;
-    const chartHeight = height - padding * 2;
+export default function AreaChart({ data }: AreaChartProps) {
 
     const maxVolume = useMemo(() => {
         const max = Math.max(...data.map(d => d.volume), 0);
@@ -33,7 +31,6 @@ export default function AreaChart({ data, height = 300 }: AreaChartProps) {
 
     const areaPath = useMemo(() => {
         if (data.length === 0) return "";
-        const width = 100 / (data.length - 1);
         const p = points;
         return `M 0,100 L ${p} L 100,100 Z`;
     }, [data, points]);

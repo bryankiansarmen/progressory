@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Exercise } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Target, Layers, ChevronDown, ChevronUp, Box, MoreVertical, Edit2, Trash2, AlertCircle } from "lucide-react";
+import { Dumbbell, Layers, ChevronDown, ChevronUp, Box, MoreVertical, Edit2, Trash2 } from "lucide-react";
 import CreateExerciseDialog from "./CreateExerciseDialog";
 import { useConfirm } from "@/hooks/useInteraction";
 import FamilyTrendChart from "./FamilyTrendChart";

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
-import { ConfirmationModal, ConfirmationModalProps } from "@/components/ui/confirmation-modal";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 export interface ConfirmOptions {
   title: string;

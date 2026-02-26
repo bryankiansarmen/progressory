@@ -24,7 +24,7 @@ interface PredictionResult {
 }
 
 const DEFAULT_WEIGHT_INCREMENT = 2.5; // kg
-const DEFAULT_REP_INCREMENT = 1;
+
 
 /**
  * Determine if the last session was successful (all sets completed)

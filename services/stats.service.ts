@@ -3,7 +3,7 @@
 import db from "@/lib/db";
 import { subDays, startOfDay, startOfWeek } from "date-fns";
 import { calculateBrzycki1RM } from "@/lib/utils/analytics";
-import { FatigueLevel, MuscleFatigueEntry, normalizeFatigueLevel } from "@/lib/utils/fatigue";
+import { MuscleFatigueEntry, normalizeFatigueLevel } from "@/lib/utils/fatigue";
 
 export interface DashboardStats {
     weeklyVolume: number;

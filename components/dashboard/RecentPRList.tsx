@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, ArrowUpRight } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 interface PRRecord {

@@ -21,7 +21,7 @@ export default function SessionSummary({ exercises, activeIndex, onSelectExercis
             <div className="space-y-2">
                 {exercises.map((name, index) => {
                     const isActive = index === activeIndex;
-                    const isUpcoming = index > activeIndex;
+
                     const isDone = index < activeIndex;
 
                     return (

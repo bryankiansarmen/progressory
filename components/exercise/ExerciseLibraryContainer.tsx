@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Exercise } from "@/types";
 import ExerciseCard from "./ExerciseCard";
 import ExerciseFilters from "./ExerciseFilters";
@@ -159,7 +159,7 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
                     const exists = variations.some(v => v.id === updatedExercise.id);
                     return {
                         ...parent,
-                        variations: exists 
+                        variations: exists
                             ? variations.map(v => v.id === updatedExercise.id ? updatedExercise : v)
                             : [...variations, updatedExercise].sort((a, b) => a.name.localeCompare(b.name))
                     };
@@ -182,7 +182,7 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
             const userId = "user_123";
             const { archiveExercise } = await import("@/services/exercise.service");
             await archiveExercise(id, userId);
-            
+
             setExercises((prev) => {
                 // Remove from top-level
                 const filtered = prev.filter((ex) => ex.id !== id);
@@ -214,9 +214,9 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {exercises.map((exercise) => (
-                    <ExerciseCard 
-                        key={exercise.id} 
-                        exercise={exercise} 
+                    <ExerciseCard
+                        key={exercise.id}
+                        exercise={exercise}
                         onExerciseUpdated={handleExerciseUpdated}
                         onExerciseArchived={handleExerciseArchived}
                     />
@@ -233,7 +233,7 @@ export default function ExerciseLibraryContainer({ initialExercises }: ExerciseL
                 ) : isError ? (
                     <div className="flex flex-col items-center gap-2">
                         <p className="text-sm font-medium text-destructive">Failed to load more exercises.</p>
-                        <button 
+                        <button
                             onClick={loadMore}
                             className="px-4 py-2 text-sm font-medium bg-secondary hover:bg-secondary/80 rounded-md transition-colors"
                         >

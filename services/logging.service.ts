@@ -128,7 +128,7 @@ export const discardDraftSession = async (userId: string) => {
         await db.draftSession.delete({
             where: { userId },
         });
-    } catch (e) {
+    } catch {
         // Ignore if record doesn't exist
     }
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Dumbbell, Info } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 
 interface Set {
     id: string;

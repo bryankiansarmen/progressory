@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { LayoutList, Trash2, CheckCircle2, PlayCircle, Loader2, Edit2 } from "lucide-react";
 import Link from "next/link";
 import { enrollInProgram, deleteProgram } from "@/services/program.service";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useConfirm } from "@/hooks/useInteraction";
 
@@ -17,7 +16,6 @@ interface ProgramCardProps {
 }
 
 export default function ProgramCard({ program, onDelete }: ProgramCardProps) {
-    const router = useRouter();
     const [isEnrolling, setIsEnrolling] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const confirm = useConfirm();

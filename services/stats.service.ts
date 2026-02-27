@@ -34,11 +34,23 @@ export const getStrengthScore = async (userId: string): Promise<number> => {
 
     let totalScore = 0;
 
-    // For each core lift, find the best estimated 1RM from history
+    // For each core lift, find the best estimated 1RM from history including variations
     for (const ex of coreExercises) {
+        // Find all IDs in this movement family (the lift itself + its variations)
+        const family = await db.exercise.findMany({
+            where: {
+                OR: [
+                    { id: ex.id },
+                    { parentId: ex.id }
+                ]
+            },
+            select: { id: true }
+        });
+        const familyIds = family.map(f => f.id);
+
         const entries = await db.workoutLogEntry.findMany({
             where: {
-                exerciseId: ex.id,
+                exerciseId: { in: familyIds },
                 workoutLog: { userId }
             },
             include: {

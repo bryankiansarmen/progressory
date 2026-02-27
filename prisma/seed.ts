@@ -54,7 +54,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Arms",
         "equipment": "Dumbbell",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -64,7 +64,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Legs",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -94,7 +94,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Legs",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -104,7 +104,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Legs",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -144,7 +144,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Legs",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -154,7 +154,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Legs",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -164,7 +164,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Core",
         "equipment": "Bodyweight",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 60,
         "parentId": null
     },
@@ -184,7 +184,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Shoulders",
         "equipment": "Machine",
-        "isCoreLift": true,
+        "isCoreLift": false,
         "restTime": 90,
         "parentId": null
     },
@@ -194,7 +194,7 @@ async function main() {
         "category": "Strength",
         "muscleGroup": "Shoulders",
         "equipment": "Mixed",
-        "isCoreLift": false,
+        "isCoreLift": true,
         "restTime": 120,
         "parentId": null
     },

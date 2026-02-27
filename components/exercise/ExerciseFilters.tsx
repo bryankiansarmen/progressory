@@ -2,6 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { MUSCLE_GROUPS, CATEGORIES } from "@/lib/constants/exercises";
 
 interface ExerciseFiltersProps {
     searchQuery: string;
@@ -20,17 +21,8 @@ export default function ExerciseFilters({
     muscleGroupFilter,
     onMuscleGroupChange,
 }: ExerciseFiltersProps) {
-    const categories = ["all", "Strength", "Cardio", "Flexibility", "Stretching"];
-    const muscleGroups = [
-        "all",
-        "Chest",
-        "Legs",
-        "Back",
-        "Arms",
-        "Shoulders",
-        "Core",
-        "FullBody",
-    ];
+    const categories = ["all", ...CATEGORIES];
+    const muscleGroups = ["all", ...MUSCLE_GROUPS];
 
     return (
         <div className="flex flex-col sm:flex-row items-center gap-4 flex-1">

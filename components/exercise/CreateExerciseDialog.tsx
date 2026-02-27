@@ -8,6 +8,7 @@ import { Exercise } from "@/types";
 import { createCustomExercise, updateExercise, getPotentialParents } from "@/services/exercise.service";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { MUSCLE_GROUPS, CATEGORIES } from "@/lib/constants/exercises";
 
 interface CreateExerciseDialogProps {
     onExerciseCreated?: (exercise: Exercise) => void;
@@ -29,8 +30,8 @@ export default function CreateExerciseDialog({
     const [parents, setParents] = useState<Exercise[]>([]);
     const [formData, setFormData] = useState({
         name: exercise?.name || "",
-        category: exercise?.category || "Strength",
-        muscleGroup: exercise?.muscleGroup || "Chest",
+        category: exercise?.category || CATEGORIES[0],
+        muscleGroup: exercise?.muscleGroup || MUSCLE_GROUPS[0],
         equipment: exercise?.equipment || "",
         parentId: exercise?.parentId || "",
     });
@@ -74,8 +75,8 @@ export default function CreateExerciseDialog({
             if (!isEditing) {
                 setFormData({
                     name: "",
-                    category: "Strength",
-                    muscleGroup: "Chest",
+                    category: CATEGORIES[0],
+                    muscleGroup: MUSCLE_GROUPS[0],
                     equipment: "",
                     parentId: "",
                 });
@@ -132,14 +133,9 @@ export default function CreateExerciseDialog({
                                 value={formData.muscleGroup}
                                 onChange={(e) => setFormData({ ...formData, muscleGroup: e.target.value })}
                             >
-                                <option>Chest</option>
-                                <option>Back</option>
-                                <option>Shoulders</option>
-                                <option>Biceps</option>
-                                <option>Triceps</option>
-                                <option>Legs</option>
-                                <option>Core</option>
-                                <option>FullBody</option>
+                                {MUSCLE_GROUPS.map(group => (
+                                    <option key={group} value={group}>{group}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -149,10 +145,9 @@ export default function CreateExerciseDialog({
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             >
-                                <option>Strength</option>
-                                <option>Cardio</option>
-                                <option>Flexibility</option>
-                                <option>Stretching</option>
+                                {CATEGORIES.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
                             </select>
                         </div>
                     </div>

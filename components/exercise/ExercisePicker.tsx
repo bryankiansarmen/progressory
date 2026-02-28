@@ -179,7 +179,7 @@ export default function ExercisePicker({
                             <div key={movement.id} className="space-y-1">
                                 {/* Movement Header */}
                                 <div
-                                    onClick={() => hasVariations ? setExpandedId(movement.id) : handleSelect(movement)}
+                                    onClick={() => handleSelect(movement)}
                                     className={cn(
                                         "flex items-center justify-between p-3 rounded-xl border-2 transition-all group cursor-pointer",
                                         isExpanded && hasVariations ? "border-primary/20 bg-primary/5 shadow-sm" :
@@ -215,14 +215,12 @@ export default function ExercisePicker({
                                         </div>
                                     </div>
 
-                                    {!hasVariations && (
-                                        <div className={cn(
-                                            "p-2 rounded-full transition-all shadow-sm",
-                                            isSelected ? "bg-primary text-white" : "bg-primary/10 group-hover:bg-primary group-hover:text-white"
-                                        )}>
-                                            {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                                        </div>
-                                    )}
+                                    <div className={cn(
+                                        "p-2 rounded-full transition-all shadow-sm",
+                                        isSelected ? "bg-primary text-white" : "bg-primary/10 group-hover:bg-primary group-hover:text-white"
+                                    )}>
+                                        {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                                    </div>
                                 </div>
 
                                 {hasVariations && isExpanded && (
